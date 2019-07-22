@@ -9,7 +9,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class Launch {
 	
 	public static void main(String[] args) {
-		Boot boot = new SpringBoot(new ClassPathXmlApplicationContext("applicationContext.xml"), new Config("ticket.service.pump"));
+		Boot boot = new SpringBoot(new ClassPathXmlApplicationContext("applicationContext.xml"), new Config("plan"));
 		try {
 			HttpServer.start(boot);
 		} catch (Exception e) {

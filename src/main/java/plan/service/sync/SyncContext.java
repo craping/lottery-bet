@@ -1,6 +1,7 @@
 package plan.service.sync;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -45,8 +46,6 @@ public class SyncContext implements SchedulingConfigurer {
 	
 	protected static ObjectMapper MAPPER = new ObjectMapper();
 	
-	private static RedisUtil redisUtil = new RedisUtil();
-	
 	static{
 		MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		MAPPER.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -68,34 +67,15 @@ public class SyncContext implements SchedulingConfigurer {
 	*/  
 	    
 	public static void putGlobalMsg(SyncMsg msg){
-		Set<String> tokens = redisUtil.keys("user_*");
+		Set<String> tokens = RedisUtil.keys("user_*");
 		tokens.forEach(key -> {
 			try {
-				redisUtil.rpush("queue_"+key.split("_")[1], MAPPER.writeValueAsString(msg));
+				RedisUtil.rpush("queue_"+key.split("_")[1], MAPPER.writeValueAsString(msg));
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}
 		});
 	}
-	
-	/**  
-	* @Title: putMsg  
-	* @Description: 发送给出当前token以外会话 
-	* @param @param token
-	* @param @param msg    参数  
-	* @return void    返回类型  
-	* @throws  
-	*/  
-	    
-	public static void putMsg(String token, SyncMsg msg){
-		token = token.contains("_m")?token.split("_")[0]:token+"_m";
-		try {
-			redisUtil.rpush("queue_"+token, MAPPER.writeValueAsString(msg));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-	}
-	
 	  
 	/**  
 	* @Title: toMsg  
@@ -108,10 +88,16 @@ public class SyncContext implements SchedulingConfigurer {
 	    
 	public static void toMsg(String token, SyncMsg msg){
 		try {
-			redisUtil.rpush("queue_"+token, MAPPER.writeValueAsString(msg));
+			RedisUtil.rpush("queue_"+token, MAPPER.writeValueAsString(msg));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void toMsg(Collection<String> tokens, SyncMsg msg){
+		tokens.forEach(token -> {
+			toMsg(token, msg);
+		});
 	}
 	
 	@Scheduled(fixedDelay=1000)
@@ -128,9 +114,9 @@ public class SyncContext implements SchedulingConfigurer {
 			queue = "queue_"+session.getToken();
 			currentTime = System.currentTimeMillis();
 			
-			list = redisUtil.lrange(queue, 0, 50);
+			list = RedisUtil.lrange(queue, 0, 50);
 			if(list.size() > 0){
-				redisUtil.ltrim(queue, list.size(), -1);
+				RedisUtil.ltrim(queue, list.size(), -1);
 				 msgs = list.stream().map(s -> {
 					try {
 						return MAPPER.readValue(s, SyncMsg.class);

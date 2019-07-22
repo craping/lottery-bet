@@ -22,9 +22,8 @@
 	<!-- 自动扫描所有注解该路径 -->
 	<context:component-scan base-package="plan" />
 	
-	<context:property-placeholder location="classpath*:*-config.properties" ignore-unresolvable="true"/>
+	<!-- <context:property-placeholder location="classpath*:*-config.properties" ignore-unresolvable="true"/> -->
 	<!-- 引入配置 -->
-	<!-- <import resource="classpath:applicationContext-dataSource.xml" /> -->
 	<import resource="classpath:spring-data-mongo.xml" />
 	<import resource="classpath:spring-data-redis.xml" />
 </beans>
