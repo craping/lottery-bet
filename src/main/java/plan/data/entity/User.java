@@ -27,6 +27,8 @@ public class User {
 	private String createTime;
 	@Field
 	private String endTime;
+	@Field
+	private Boolean state;
 	/** 用户token */
 	@Field
 	private String token;

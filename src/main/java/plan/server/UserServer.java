@@ -1,5 +1,7 @@
 package plan.server;
 
+import java.util.List;
+
 import org.crap.jrain.core.ErrcodeException;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -10,16 +12,11 @@ import plan.data.entity.User;
 import plan.service.CustomErrors;
 
 @Service
-public class UserServer extends BaseServer{
-	
-	public boolean exist(String userName) {
-		// 判断用户名是否已存在
-		Query query = new Query(Criteria.where("userInfo.userName").is(userName));
-		return mongoTemplate.count(query, User.class) > 0;
-	}
-	
+public class UserServer extends BaseServer {
+
 	/**
 	 * 新增用户
+	 * 
 	 * @param user
 	 * @return
 	 * @throws ErrcodeException
@@ -27,23 +24,29 @@ public class UserServer extends BaseServer{
 	public User insert(User user) throws ErrcodeException {
 		String userName = user.getUserName();
 		// 判断用户名是否已存在
-		Query query = new Query(Criteria.where("userInfo.userName").is(userName));
+		Query query = new Query(Criteria.where("userName").is(userName));
 		if (mongoTemplate.count(query, User.class) > 0)
 			throw new ErrcodeException(CustomErrors.USER_EXIST_ERR.setArgs(userName));
 		return mongoTemplate.insert(user);
 	}
+	
+	public List<User> getUsers() throws ErrcodeException {
+		return mongoTemplate.findAll(User.class);
+	}
 
 	/**
 	 * 获取用户
+	 * 
 	 * @param id
 	 * @return
 	 */
 	public User find(String id) {
 		return mongoTemplate.findOne(Query.query(Criteria.where("_id").is(id)), User.class);
 	}
-	
+
 	/**
 	 * 判断用户是否存在 不存在则报错
+	 * 
 	 * @param id
 	 * @return User.class
 	 * @throws ErrcodeException
@@ -58,6 +61,7 @@ public class UserServer extends BaseServer{
 
 	/**
 	 * 获取用户
+	 * 
 	 * @param userName
 	 * @param userPwd
 	 * @return
@@ -70,10 +74,11 @@ public class UserServer extends BaseServer{
 
 	/**
 	 * 更新用户信息
+	 * 
 	 * @param user
 	 * @return
 	 */
-	public int updateToken(User user) {		
+	public int updateToken(User user) {
 		try {
 			Query query = new Query(Criteria.where("id").is(user.getId()));
 			Update update = Update.update("token", user.getToken());
@@ -83,10 +88,10 @@ public class UserServer extends BaseServer{
 		}
 		return 0;
 	}
-	
-	
+
 	/**
 	 * 修改密码
+	 * 
 	 * @param user
 	 * @return
 	 */

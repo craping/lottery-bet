@@ -27,10 +27,10 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import net.sf.json.JSONObject;
 import plan.data.entity.User;
-import plan.data.redis.RedisUtil;
 import plan.server.UserServer;
 import plan.service.CustomErrors;
 import plan.service.param.TokenParam;
+import plan.service.utils.Coder;
 import plan.service.utils.Tools;
 
 @Pump("user")
@@ -44,43 +44,37 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 	@Autowired
 	private StringRedisTemplate redisTemplate;
 	
-	@Pipe("register")
+	@Pipe("addUser")
 	@BarScreen(
-		desc="用户注册",
-		security=true,
+		desc="新增用户",
 		params= {
-			@Parameter(value="user_name",  desc="登录名"),
-			@Parameter(value="user_pwd",  desc="密码"),
-			@Parameter(value="confirm_pwd",  desc="确认密码"),
-			@Parameter(value="code",  desc="手机验证码")
+			@Parameter(value="userName",  desc="登录名"),
+			@Parameter(value="userPwd",  desc="密码"),
+			@Parameter(value="endTime",  desc="服务时间")
 		}
 	)
-	public Errcode register (JSONObject params) throws ErrcodeException {
-		String userPwd = params.getString("user_pwd");
-		if (!userPwd.equals(params.getString("confirm_pwd")))
-			throw new ErrcodeException(CustomErrors.USER_CHANGE_PWD_ERR);
-		
+	public Errcode addUser (JSONObject params) throws ErrcodeException {
 		User user = new User();
-		
-		// 新用户注册免费试用一天
-		
+		user.setUserName(params.getString("userName"));
+		user.setUserPwd(Coder.encryptMD5(params.getString("userPwd")));
+		user.setCreateTime(Tools.getTimestamp());
+		user.setEndTime(Tools.dateToStamp(params.getString("endTime") + " 00:00:00"));
+		user.setState(true);
 		userServer.insert(user);
-		
 		return new DataResult(Errors.OK);
 	}
 	
 	@Pipe("login")
 	@BarScreen(
 		desc="用户登录",
-		security=true,
 		params= {
-			@Parameter(value="login_name",  desc="登录名"),
-			@Parameter(value="login_pwd",  desc="密码"),
+			@Parameter(value="userName",  desc="登录名"),
+			@Parameter(value="userPwd",  desc="密码"),
 		}
 	)
 	public Errcode login (JSONObject params) {
-		String userName = params.getString("login_name");
-		String userPwd = params.getString("login_pwd");
+		String userName = params.getString("userName");
+		String userPwd = params.getString("userPwd");
 		User user = userServer.getUser(userName, userPwd);
 		// 判断用户是否存在
 		if (user == null) 
@@ -91,6 +85,9 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 			redisTemplate.delete("queue_" + user.getToken()); 
 			redisTemplate.delete("queue_" + user.getToken() + "_m"); 
 		}
+		
+		if (!user.getState())
+			return new Result(CustomErrors.USER_LOCKED);
 		
 		// 用户服务状态已过期
 		if (Tools.isOverTime(Long.valueOf(user.getEndTime()), 1))
@@ -107,9 +104,9 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		System.out.println("IP:"+insocket.getAddress().getHostAddress());
 		String ip = insocket.getAddress().getHostAddress();
 		
-		user.setUserPwd(null);
 		Map<Object, Object> userMap = new HashMap<Object, Object>();
 		userMap.put("uid", user.getId());
+		userMap.put("userName", user.getUserName());
 		userMap.put("token", new_token);
 		userMap.put("loginTime", String.valueOf(new Date().getTime()));
 		userMap.put("loginIP", ip);
@@ -118,25 +115,14 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		return new DataResult(Errors.OK, new Data(user));
 	}
 	
-	@Pipe("getUserInfo")
+	@Pipe("userList")
 	@BarScreen(
-		desc="获取用户信息",
-		params = {
-			@Parameter(type=TokenParam.class)
-		}
+		desc="获取用户列表",
+		params = {}
 	)
-	public Errcode getUserInfo (JSONObject params) {
-		if (Tools.isStrEmpty(params.optString("token")))
-			return new Result(CustomErrors.USER_PARAM_NULL.setArgs("token"));
+	public Errcode userList (JSONObject params) throws ErrcodeException {
 		
-		String key = "user_" + params.getString("token").split("_")[0];
-		if (!(RedisUtil.exists(key))) 
-			return new Result(CustomErrors.USER_NOT_LOGIN);
-		
-		Map<Object, Object> userMap = redisTemplate.opsForHash().entries(key);
-		userMap.put("loginTime", Long.valueOf(userMap.get("loginTime").toString()));
-		userMap.put("userInfo", JSONObject.fromObject(userMap.get("userInfo")));
-		return new DataResult(Errors.OK, new Data(userMap));
+		return new DataResult(Errors.OK, new Data(userServer.getUsers()));
 	}
 	
 	@Pipe("logout")
@@ -147,6 +133,19 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		}
 	)
 	public Errcode logout (JSONObject params) {
+		String key = "user_" + params.getString("token").split("_")[0];
+		redisTemplate.delete(key); // 删除缓存
+		return new DataResult(Errors.OK);
+	}
+	
+	
+	@Pipe("bet")
+	@BarScreen(
+		desc="确定投注",
+		params = {
+		}
+	)
+	public Errcode bet(JSONObject params) {
 		String key = "user_" + params.getString("token").split("_")[0];
 		redisTemplate.delete(key); // 删除缓存
 		return new DataResult(Errors.OK);
