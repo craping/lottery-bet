@@ -1,0 +1,16 @@
+target
+logs
+node_modules
+node_modules/
+.gradle
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.settings
+.springBeans
+.class
+*.log
+*.class
+*.pro
