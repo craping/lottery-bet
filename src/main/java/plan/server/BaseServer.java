@@ -1,6 +1,5 @@
 package plan.server;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +19,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import plan.data.mongo.entity.User;
-import plan.data.mongo.entity.field.UserInfo;
+import plan.data.entity.User;
 import plan.data.redis.RedisUtil;
 import plan.service.CustomErrors;
 import plan.service.param.TokenParam;
@@ -57,18 +55,18 @@ public class BaseServer {
 		return user;
 	}
 	
-	public UserInfo getUserInfo(Map<?, ?> params) throws ValidationException{
-		if(!params.containsKey(new TokenParam().getValue()))
-			throw new ValidationException(CustomErrors.USER_PARAM_NULL.setArgs("token"));
-		
-		String userInfoJson = RedisUtil.hget("user_"+params.get("token").toString().split("_")[0], "userInfo");
-		try {
-			return JSON_MAPPER.readValue(userInfoJson, UserInfo.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new ValidationException(CustomErrors.USER_NOT_LOGIN);
-		}
-	}
+//	public UserInfo getUserInfo(Map<?, ?> params) throws ValidationException{
+//		if(!params.containsKey(new TokenParam().getValue()))
+//			throw new ValidationException(CustomErrors.USER_PARAM_NULL.setArgs("token"));
+//		
+//		String userInfoJson = RedisUtil.hget("user_"+params.get("token").toString().split("_")[0], "userInfo");
+//		try {
+//			return JSON_MAPPER.readValue(userInfoJson, UserInfo.class);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			throw new ValidationException(CustomErrors.USER_NOT_LOGIN);
+//		}
+//	}
 	
 	public DataResult findPage(Page page, Query query, Class<?> clazz) {
 		DataResult dataResult = new DataResult(Errors.EXCEPTION_UNKNOW);

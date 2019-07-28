@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import plan.data.mongo.entity.User;
+import plan.data.entity.User;
 import plan.service.CustomErrors;
 
 @Service
@@ -25,7 +25,7 @@ public class UserServer extends BaseServer{
 	 * @throws ErrcodeException
 	 */
 	public User insert(User user) throws ErrcodeException {
-		String userName = user.getUserInfo().getUserName();
+		String userName = user.getUserName();
 		// 判断用户名是否已存在
 		Query query = new Query(Criteria.where("userInfo.userName").is(userName));
 		if (mongoTemplate.count(query, User.class) > 0)
