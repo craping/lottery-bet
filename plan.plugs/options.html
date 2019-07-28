@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>计划狗 选项</title>
+<meta charset="utf-8">
+<meta name="Author" content="">
+<meta name="Keywords" content="">
+<meta name="Description" content="">
+<!-- <link rel="stylesheet" href="lib/bootstrap-4.1/css/bootstrap.min.css"> -->
+<link rel="stylesheet" href="lib/bootstrap-4.2.1-dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="lib/fontawesome-free-5.1.1-web/css/all.css">
+<link rel="stylesheet" href="css/options.css">
+</head>
+
+<body>
+	<div v-cloak id="app" class="container-fluid">
+
+		<header class="col-lg-2 col-md-3 side-nav">
+			<h1 class="mt-4">
+				<a title="关于" class="" @click="tab('action','关于')" href="#" >计划狗</a>
+				<sup class="om-experimental text-danger">测试版</sup>
+			</h1>
+			<nav class="nav nav-pills flex-column">
+				<li class="nav-header">设定</li>
+				<a class="nav-link active" name="user" data-toggle="tab" @click="tab('user','用户：'+bgPage.User.userName)" href="#user" role="tab" aria-controls="user" aria-selected="true">
+					<i class="fas fa-user"></i> 个人中心
+				</a>
+				<a id="tab_about" class="d-none" @click="tab('action','关于')" href="#about" ></a>
+				<a class="nav-link" name="general" data-toggle="tab" @click="tab('action','通用')" href="#general" role="tab" aria-controls="general" aria-selected="true">
+					<i class="fas fa-cog"></i> 通用
+				</a>
+				<a class="nav-link" data-toggle="tab" @click="tab('action', '导入/导出')" href="#io" role="tab" aria-controls="io" aria-selected="false">
+					<i class="fas fa-save"></i> 导入/导出
+				</a>
+				<li class="divider"></li>
+				<li class="nav-header">计划方案</li>
+				<a v-for="(v, k) in schemes" class="nav-link" :name="k" @click="tab('scheme', k)" data-toggle="tab" href="#scheme" role="tab" aria-controls="scheme" aria-selected="false">
+					<i :class="constant.lottery[v.lottery].ico"></i> {{k}} <i class="far fa-play-circle text-success" v-show="bgPage.schemes[k].schemeCache.start"></i>
+				</a>
+				<a class="nav-link" data-toggle="modal" data-target="#newSchemeModal" @click="forms.schemeForm.name='';" href="#" role="modal">
+					<i class="fas fa-plus"></i> 新建计划方案…
+				</a>
+				<li class="divider" v-show="action"></li>
+				<li class="nav-header" v-show="action">操作</li>
+				<button role="button" class="nav-link btn text-left border-0" :class="forms.change?'btn-success':'btn-light'" v-show="action" @click="generalSubmit">
+					<i class="far fa-check-circle"></i> 应用选项
+				</button>
+				<button role="button" class="nav-link btn btn-outline-danger text-left mt-1 border-0" :disabled="!forms.change" v-show="action" @click="cancel">
+					<i class="far fa-times-circle"></i> 撤销更改
+				</button>
+			</nav>
+		</header>
+	
+		<main class="col-lg-10 col-md-9 offset-lg-2 offset-md-3 angular-animate ng-scope">
+			<div class="page-header border-bottom">
+				<div v-if="!action&&curScheme.schemeCache" class="float-right">
+					<button class="btn" :class="[curScheme.schemeCache.able?'btn-secondary':'btn-success']" @click="setAble(!curScheme.schemeCache.able)">
+						<i class="fas" :class="[curScheme.schemeCache.able?'fa-pause':'fa-play']"></i> {{curScheme.schemeCache.able?"禁用方案":"启用计划"}}
+					</button>
+					<!-- <button class="btn" :class="[curScheme.schemeCache.auto?'btn-info':'btn-success']" @click="setAuto(!curScheme.schemeCache.auto)">
+						<i class="fas" :class="[curScheme.schemeCache.auto?'fa-mouse-pointer':'fa-retweet']"></i> {{curScheme.schemeCache.auto?"手工投注":"自动投注"}}
+					</button> -->
+					<button class="btn btn-light" data-toggle="modal" data-target="#changeSchemeModal" role="modal" @click="forms.schemeForm.name = curScheme.schemeCache.name">
+						<i class="fas fa-edit"></i> 更改名称
+					</button>
+					<button class="btn btn-danger" data-toggle="modal" data-target="#removeSchemeModal" role="modal">
+						<i class="fas fa-trash-alt"></i> 删除
+					</button>
+				</div>
+				<h2>
+					<i v-if="!action&&curScheme.schemeCache&&curScheme.schemeCache.lottery" :class="constant.lottery[curScheme.schemeCache.lottery].ico"></i>
+					{{title}}
+				</h2>
+			</div>
+
+			<div id="alert-success" class="alert-top-wrapper hide">
+				<div class="alert alert-success" role="alert">
+					<strong><i class="fas fa-check"></i></strong> <span name="text"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			</div>
+			<div id="alert-danger" class="alert-top-wrapper hide">
+				<div class="alert alert-danger" role="alert">
+					<strong><i class="fas fa-times"></i></strong> <span name="text"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			</div>
+
+			<div class="tab-content pt-6">
+				<div class="tab-pane active" id="user" role="tabpanel" aria-labelledby="user-tab"></div>
+				<div class="tab-pane" id="general" role="tabpanel" aria-labelledby="general-tab"></div>
+				<div class="tab-pane" id="io" role="tabpanel" aria-labelledby="io-tab"></div>
+				<div class="tab-pane" id="scheme" role="tabpanel" aria-labelledby="scheme-tab"></div>
+				<div class="tab-pane" id="about" role="tabpanel" aria-labelledby="about-tab"></div>
+			</div>
+		</main>
+
+		<div class="modal fade" id="newSchemeModal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<form class="modal-content needs-validation"  @submit.prevent="newSchemeSubmit" novalidate>
+					<div class="modal-header">
+						<h5 class="modal-title">新建方案</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="font-weight-bold">方案名称</label>
+							<input type="text" class="form-control" :class="{'is-invalid':!forms.schemeForm.name||bgPage.schemes[forms.schemeForm.name]}" v-model="forms.schemeForm.name" required>
+							<div class="invalid-feedback">
+								{{!forms.schemeForm.name?"方案名称不能为空":bgPage.schemes[forms.schemeForm.name]?"方案名称已经存在":""}}
+							</div>
+						</div>
+						<label class="font-weight-bold">请选择计划彩种</label>
+						<div class="form-group custom-control custom-radio" v-for="(v, k) in constant.lottery">
+							<input type="radio" :id="'lottery' + k" name="lottery" class="custom-control-input" :value="k" v-model.number="forms.schemeForm.lottery" required>
+							<label class="custom-control-label" :for="'lottery' + k"><i :class="v.ico"></i> {{v.name}}</label>
+							<small class="form-text text-muted">{{v.info}}</small>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+						<button type="submit" class="btn btn-primary" :disabled="!forms.schemeForm.name||bgPage.schemes[forms.schemeForm.name]">创建</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="modal fade" id="removeSchemeModal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<form class="modal-content needs-validation" @submit.prevent="removeSchemeSubmit" novalidate>
+					<div class="modal-header">
+						<h5 class="modal-title">删除方案</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p class="ng-binding">真的要删除这个方案吗？</p>
+						<div class="alert alert-secondary" v-if="curScheme.schemeCache&&curScheme.schemeCache.lottery">
+							<i :class="constant.lottery[curScheme.schemeCache.lottery].ico"></i> {{curScheme.schemeCache.name}}
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+						<button type="submit" class="btn btn-danger">删除</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="modal fade" id="changeSchemeModal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<form class="modal-content needs-validation" @submit.prevent="changeSchemeSubmit" novalidate>
+					<div class="modal-header">
+						<h5 class="modal-title">重命名</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="font-weight-bold">新的名称</label>
+							<input type="text" class="form-control" :class="{'is-invalid':!forms.schemeForm.name}" v-model="forms.schemeForm.name" required>
+							<div class="invalid-feedback">
+								{{!forms.schemeForm.name?"方案名称不能为空":""}}
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+						<button type="submit" class="btn btn-primary" :disabled="!forms.schemeForm.name||bgPage.schemes[forms.schemeForm.name]">更改名称</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+	</div>
+
+	<script src="lib/script/script.min.js"></script>
+	<script src="options.js" charset="utf-8" type="text/javascript"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<legend>计划选择</legend>
+<form id="planForm" class="px-5">
+    <div class="form-inline">
+        <label class="my-1 mr-2" for="pos">位置</label>
+        <select class="custom-select my-1 mr-sm-2" id="pos" name="position">
+            <option selected value="*">全部</option>
+            <option value="1">第一位</option>
+            <option value="2">第二位</option>
+            <option value="3">第三位</option>
+            <option value="4">第四位</option>
+            <option value="5">第五位</option>
+            <option value="6">第六位</option>
+            <option value="7">第七位</option>
+            <option value="8">第八位</option>
+            <option value="9">第九位</option>
+            <option value="10">第十位</option>
+            <option value="12">冠亚军</option>
+        </select>
+
+        <label class="my-1 mr-2" for="play">玩法</label>
+        <select class="custom-select my-1 mr-sm-2" id="play" name="play">
+            <option selected value="*">全部</option>
+            <option value="DWD">定位</option>
+            <option value="DX">大小</option>
+            <option value="DS">单双</option>
+            <option value="LH">龙虎</option>
+            <option value="HZ">和值</option>
+            <option value="HZDX">和值大小</option>
+            <option value="HZDS">和值单双</option>
+        </select>
+
+        <label class="my-1 mr-2" for="play">码数</label>
+        <select class="custom-select my-1 mr-sm-2" id="codeNum" name="codeNum">
+            <option selected value="*">全部</option>
+            <option v-for="n in 9" v-if="n>3" :value="n">{{n}}码</option>
+        </select>
+
+        <label class="my-1 mr-2" for="planType">预测</label>
+        <select class="custom-select my-1 mr-sm-2" id="planType" name="planType">
+            <option selected value="*">全部</option>
+            <option v-for="n in 3" :value="n">{{n}}期</option>
+        </select>
+
+        <input type="hidden" id="searchLottery" name="lottery"/>
+        <div class="input-group my-1 mr-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text bg-transparent border-right-0">近</span>
+            </div>
+            <input type="number" class="form-control col-4 border-left-0 border-right-0" min="1" max="500" value="20" id="count" name="count"/>
+            <div class="input-group-append">
+                <span class="input-group-text bg-transparent border-left-0">期</span>
+                <button id="search" type="button" class="btn btn-primary">查询</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row tab-content">
+        <div class="col-sm-12 tab-pane fade show active" id="planPane">
+            <div id="planList" ></div>
+        </div>
+        <div class="col-sm-12 tab-pane" id="recordPane">
+            <div class="list" v-for="v in historyPlan">
+                <div class="a1">{{v.period}}期</div>
+                <div class="a2"><SPAN class="plan_qq">第 1 期</SPAN></div>
+                <div class="a3">
+                    <span v-for="n in v.schema.split(' ')" :class="[v.win_result==n?'kj_ok':'kj_no']">
+                        {{n}}
+                    </span>
+                </div>
+                <div class="a4">{{v.win_period}}期</div>
+                <div class="a5"><span>{{v.win_result}}</span></div>
+                <div class="a6"><span :class="[v.win?'plan_ok':'plan_no']">{{v.win?"中":"错"}}</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-12">
+            <button type="submit" class="btn btn-success">应用计划</button>
+            <button id="back" type="button" class="btn btn-warning d-none">返回</button>
+        </div>
+    </div>
+</form>
+
+
+
+<div class="my-5"></div>
+
+
+<legend>自动策略配置</legend>
+
+<form id="strategyForm" class="px-5" novalidate>
+    <fieldset>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">初始金额</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input type="number" name="money" min="0" value="0" step="0.01" class="form-control" id="money">
+                    <div class="input-group-append">
+                        <span class="input-group-text">元</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">平台赔率</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input type="range" min="9" max="10" step="0.01" value="9.9" name="odds" class="form-control custom-range" id="odds">
+                </div>
+                <small class="form-text text-danger">标准：<span id="odds-val">9.9</span> - 双面：<span id="odds-val1">1.98</span></small>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">投注模式</label>
+            <div class="col-sm-10">
+                <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="radio" id="price1" name="price" checked="checked" class="custom-control-input" value="2">
+                    <label class="custom-control-label" for="price1">2元</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="radio" id="price2" name="price" class="custom-control-input" value="0.2">
+                    <label class="custom-control-label" for="price2">2角</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="radio" id="price3" name="price" class="custom-control-input" value="0.02">
+                    <label class="custom-control-label" for="price3">2分</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">最大追期</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input type="number" name="maxChase" min="2" value="10" step="1" class="form-control" id="maxChase">
+                    <div class="input-group-append">
+                        <span class="input-group-text">期</span>
+                    </div>
+                </div>
+                <small class="form-text text-muted">当追号期数达到则重置为初始倍数</small>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">追号方式</label>
+            <div class="col-sm-10">
+                <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="radio" id="chase1" name="chaseType" checked="checked" class="custom-control-input" value="1">
+                    <label class="custom-control-label" for="chase1">利润追号</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="radio" id="chase2" name="chaseType" class="custom-control-input" value="2">
+                    <label class="custom-control-label" for="chase2">翻倍追号</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="radio" id="chase3" name="chaseType" class="custom-control-input" value="3">
+                    <label class="custom-control-label" for="chase3">同倍追号</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="radio" id="chase4" name="chaseType" class="custom-control-input" value="4">
+                    <label class="custom-control-label" for="chase4">定制倍数</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row" name="sysMulti">
+            <label class="col-sm-2 col-form-label">起始倍数</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input type="number" name="minMulti" min="1" value="5" class="form-control" id="minMulti">
+                    <div class="input-group-append">
+                        <span class="input-group-text">倍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row" name="sysMulti">
+            <label class="col-sm-2 col-form-label">最大倍数</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input type="number" name="maxMulti" min="1" max="999999" value="100" class="form-control" id="maxMulti">
+                    <div class="input-group-append">
+                        <span class="input-group-text">倍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="customMulti" style="display:none">
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">止盈阈值</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input type="number" name="profitLimit" min="0" value="0" step="0.01" class="form-control" id="profitLimit">
+                    <div class="input-group-append">
+                        <span class="input-group-text">元</span>
+                    </div>
+                </div>
+                <small class="form-text text-muted">当 利润 ≥ 止盈阈值 则停止投注<p>(默认初始金额10%可手动修改)</small>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">止损阈值</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input type="number" name="lossLimit" max="0" value="0" step="0.01" class="form-control" id="lossLimit">
+                    <div class="input-group-append">
+                        <span class="input-group-text">元</span>
+                    </div>
+                </div>
+                <small class="form-text text-muted">当 亏损 ≤ 止损阈值 则停止投注<p>(默认初始金额10%可手动修改)</small>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="form-group row">
+        <div class="col-sm-12">
+            <button type="submit" class="btn btn-success" :disabled="curScheme.schemeCache?curScheme.schemeCache.start:false">更新配置</button>
+            <button type="button" name="btn_reset" class="btn btn-primary">还原配置</button>
+        </div>
+    </div>
+</form>
+
+<legend>账户信息</legend>
+<div class="px-5 mb-5">
+    <div class="card-group text-center">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">计划余额</h6>
+                <h6 class="card-text">{{account?account.balance.toString():0}}</h6>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">计划盈亏</h6>
+                <h6 class="card-text">{{account?account.balance.sub(account.money).toString():0}}</h6>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">最高金额</h6>
+                <h6 class="card-text">{{account?account.highest.toString():0}}</h6>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">最低金额</h6>
+                <h6 class="card-text">{{account?account.lowest.toString():0}}</h6>
+            </div>
+        </div>
+    </div>
+</div>

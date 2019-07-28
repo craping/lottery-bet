@@ -65,6 +65,11 @@ public class User {
 	public void setToken(String token) {
 		this.token = token;
 	}
-	
+	public Boolean getState() {
+		return state;
+	}
+	public void setState(Boolean state) {
+		this.state = state;
+	}
 	
 }

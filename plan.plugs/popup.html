@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>计划狗</title>
+	<style type="text/css" media="screen">
+		
+	</style>
+	<!-- <link rel="stylesheet" href="lib/bootstrap-4.1/css/bootstrap.min.css"> -->
+	<link rel="stylesheet" href="lib/bootstrap-4.2.1-dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="lib/fontawesome-free-5.1.1-web/css/all.css">
+	<link rel="stylesheet" href="css/popup.css">
+	<script src="lib/jquery/jquery-3.3.1.min.js" charset="utf-8" type="text/javascript"></script>
+	<script src="lib/vue/vue.js" charset="utf-8" type="text/javascript"></script>
+	<script src="common.js" charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+	<div class="tab-content" id="popup" v-cloak>
+		<div v-show="user.token">
+			<ul class="om-nav" id="options">
+				<li class="om-nav-item" id="open-site">
+					<a href="#" role="button">
+						<i class="fas fa-sitemap"></i>
+						<span class="om-profile-name">购彩页面</span>
+					</a>
+				</li>
+				<li class="om-divider"></li>
+				<li class="om-nav-item">
+					<div class="info">
+						当前账号：{{user.userName}} <br/>
+						到期时间：{{new Date(user.serverEnd).format("yyyy-MM-dd")}}
+					</div>
+				</li>
+				<li class="om-nav-item om-nav-addrule">
+					<a href="#" @click="test" role="button">
+						<i class="fas fa-sign-out-alt"></i>
+						<span>TEST</span>
+					</a>
+				</li>
+				<li class="om-nav-item om-nav-addrule">
+					<a href="#" @click="logout" role="button">
+						<i class="fas fa-sign-out-alt"></i>
+						<span>退出登录</span>
+					</a>
+				</li>
+				<!-- <li class="om-nav-item om-nav-addrule">
+					<a href="http://wpa.qq.com/msgrd?v=3&uin=&site=qq&menu=yes" target="_blank" role="button">
+						<i class="fas fa-handshake" style="color: #99dd99;"></i>
+						<span>合作联系</span>
+					</a>
+				</li> -->
+			</ul>
+			<ul id="site" class="om-nav om-hidden">
+				<li class="om-nav-item" v-for="(v, i) in sites">
+					<a :href="'http://'+v" target="_blank" role="button">
+						<i class="fas fa-link"></i><span class="om-profile-name">站点{{i}} - <span class="text-muted">({{v}})</span></span>
+					</a>
+				</li>
+				<li class="om-divider"></li>
+				<li class="om-nav-item">
+					<a role="button" id="back-options">
+						<i class="fas fa-chevron-left"></i>
+						<span class="om-profile-name">返回</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<div class="login" v-show="!user.token">
+			
+			<form class="p-4" class="needs-validation" @submit.prevent="login" novalidate>
+				<div class="form-group">
+					<label for="exampleDropdownFormEmail2">用户名</label>
+					<input type="text" class="form-control" name="login_name" :class="{'is-invalid':!forms.loginForm.login_name}" v-model="forms.loginForm.login_name" :disabled="forms.loginForm.isLogin" placeholder="用户名" required>
+					<div class="invalid-feedback">
+						{{!forms.loginForm.login_name?"用户名不能为空":""}}
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="exampleDropdownFormPassword2">密码</label>
+					<input type="password" class="form-control" name="login_pwd" :class="{'is-invalid':!forms.loginForm.login_pwd}" v-model="forms.loginForm.login_pwd" :disabled="forms.loginForm.isLogin" placeholder="密码" required>
+					<div class="invalid-feedback">
+						{{!forms.loginForm.login_pwd?"密码不能为空":""}}
+					</div>
+				</div>
+				<button type="submit" class="form-control btn btn-primary" :disabled="forms.loginForm.isLogin">
+					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-show="forms.loginForm.isLogin"></span> 
+					{{forms.loginForm.isLogin?"登录中...":"登 录"}}
+				</button>
+			</form>
+
+		</div>
+	</div>
+</body>
+</html>
+<script src="popup.js" charset="utf-8" type="text/javascript"></script>

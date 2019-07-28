@@ -1,0 +1,27 @@
+{
+	"name": "计划插件",
+	"version": "1.0.0",
+	"manifest_version": 2,
+	"description": "A plain text description",
+	"icons": {
+		"32": "icon/icon.png",
+		"48": "icon/icon.png"
+	},
+	"background":{
+		"page":"background.html"
+	},
+	"permissions":["notifications","tabs","webRequest","unlimitedStorage","http://*/*","https://*/*"], 
+	"browser_action": {
+		"default_icon": "icon/icon.png",
+		"default_title": "计划插件",
+		"default_popup": "popup.html"
+	},
+	"content_scripts":[{
+		"matches": ["<all_urls>"],
+		"js": ["lib/jquery/jquery-3.3.1.min.js", "lib/big.min.js", "contentscripts/plan.js"],
+		"css": [],
+		"run_at": "document_end"
+	}],
+	"web_accessible_resources":["lib/jquery/jquery-3.3.1.min.map"],
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}

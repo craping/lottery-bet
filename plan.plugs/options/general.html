@@ -1,0 +1,42 @@
+<form id="generalForm" @submit.prevent="generalSubmit">
+    <legend>投注站点</legend>
+    <div class="form-group row px-5">
+        <!-- <label class="col-sm-2 col-form-label">投注站点</label> -->
+        <div class="col-sm-12">
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="radio" id="site1" name="site" checked="checked" class="custom-control-input" v-model="forms.generalForm.site"
+                value="DingBo&www.55355aa.com,www.55355bb.com,www.55355cc.com,www.55355dd.com,www.55355ee.com,www.55355ff.com,www.55355gg.com,www.55355hh.com,www.55355ii.com,www.55355jj.com,www.55355kk.com,www.55355ll.com,www.55355mm.com,www.55355nn.com,www.55355oo.com,www.55355pp.com,www.55355qq.com,www.55355rr.com,www.55355ss.com,www.55355tt.com,www.55355uu.com,www.55355vv.com,www.55355ww.com,www.55355xx.com,www.55355yy.com,www.55355zz.com">
+                <label class="custom-control-label" for="site1">鼎博</label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="radio" id="site2" name="site" class="custom-control-input" v-model="forms.generalForm.site"
+                value="XinBo&www.zi918.com,www.xbylc.vip,www.xbw01.com,cn.xbw01.com,www.xbw88.net,www.xbw11.com,www.xbw22.com,www.xbw33.com,www.xi918.com,cn.xbylc.vip,www.kdl1.com,www.wpg1.com">
+                <label class="custom-control-label" for="site2">信博</label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="radio" id="site3" name="site" class="custom-control-input" v-model="forms.generalForm.site"
+                value="DeLi&pc13.nnm77.com,pc13.g9g9g.com,pc13.ab3309.info,pc13.x.ab9981.com,pc13.ab2204.space,pc13.v.mrnrnm.com,pc13.c.mrnrnm.com,pc13.n.mrnrnm.com,pc13.ab3309.info,pc13.ab6636.info,pc13.nnm77.com,pc13.g9g9g.com,pc13.ab3309.info,pc13.x.ab9981.com,pc13.ab2204.space,pc13.v.mrnrnm.com,pc13.c.mrnrnm.com,pc13.n.mrnrnm.com,pc13.ab3309.info,pc13.ab6636.info">
+                <label class="custom-control-label" for="site3">德利</label>
+            </div>
+            <p class="form-text text-muted">
+                计划自动投注只能对单独某一个站点进行投注，选择自己投注的站点<br>
+                <span class="text-info"><i class="fas fa-info-circle"></i> 应用选项后立即生效</span>
+            </p>
+        </div>
+    </div>
+    <legend>启用彩种</legend>
+    <div class="form-group row px-5">
+        <!-- <label class="col-sm-2 col-form-label">启用彩种</label> -->
+        <div class="col-sm-12">
+            <div class="custom-control custom-checkbox custom-control-inline" v-for="(v, k) in constant.lottery">
+                <input type="radio" :id="'lotteryEnable' + k" name="lotteryEnable" class="custom-control-input" :value="k" v-model="forms.generalForm.lotteryEnable">
+                <label class="custom-control-label" :for="'lotteryEnable' + k">{{v.name}}</label>
+            </div>
+            <p class="form-text text-muted">
+                计划自动投注只能对单独某一彩种进行投注，自动投注只会启动方案中相应彩种的方案。<br>
+                <span class="text-info"><i class="fas fa-info-circle"></i> 应用选项后下次启动计划生效<span>
+            </p>
+        </div>
+        
+    </div>
+</form>
