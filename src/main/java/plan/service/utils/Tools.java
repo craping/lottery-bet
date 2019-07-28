@@ -622,11 +622,13 @@ public class Tools {
 	}
 
 	public static void main(String args[]) throws Exception {
-		System.out.println(stampToDate("1548357603937"));
-		System.out.println(dateToStamp("2019-01-25 03:20:03"));
-		System.out.println(getTimestamp());
-		System.out.println(stampToDate("1548878771000"));
-		String date = "2019-03-19T16:00:00.000Z";
-		System.out.println(dateUTCToStamp(date));
+		System.out.println(stampToDate("1564243200000"));
+		System.out.println(dateToStamp("2019-07-28 00:00:00"));
+		String a = "2019-07-28";
+		System.out.println(dateToStamp(a + " 00:00:00"));
+//		System.out.println(getTimestamp());
+//		System.out.println(stampToDate("1548878771000"));
+//		String date = "2019-03-19T16:00:00.000Z";
+//		System.out.println(dateUTCToStamp(date));
 	}
 }
