@@ -33,16 +33,10 @@ var Syc = {
                 events.forEach(msg => {
                     console.log(msg);
                     const data = msg.data;
-                    switch (msg.biz) {
-                        case "BET":
-                            Plan.bet(data);
-                            break;
-                        case "UPDATE":
-                            Plan.maxChase = data;
-                            Plan.setLastBet(null);
-                            break;
-                        default:
-                            break;
+                    try{
+                        me.invokes[msg.biz][msg.action](data);
+                    }catch(e){
+                        console.error(e);
                     }
                 })
             }, 0);
@@ -51,5 +45,21 @@ var Syc = {
             console.log("reject");
             this.handling();
         });
+    },
+    invokes:{
+        LOTTERY:{
+            BET(data){
+                Plan.bet(data);
+            },
+            REVOKE(data){
+                
+            }
+        },
+        USER:{
+            UPDATE(data){
+                Plan.maxChase = data;
+                Plan.setLastBet(null);
+            }
+        }
     }
 }
