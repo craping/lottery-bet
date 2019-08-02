@@ -3,6 +3,7 @@ package plan.service.sync;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -100,6 +101,12 @@ public class SyncContext implements SchedulingConfigurer {
 		});
 	}
 	
+	public static void toMsgs(Map<String, SyncMsg> map){
+		map.forEach((token, msg) -> {
+			toMsg(token, msg);
+		});
+	}
+	
 	@Scheduled(fixedDelay=1000)
     private void run() {
 //			System.out.println("当前连接数："+CONTEXT.size());
@@ -123,7 +130,7 @@ public class SyncContext implements SchedulingConfigurer {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					return new SyncMsg();
+					return new SyncMsg(null);
 				}).collect(Collectors.toList());
 				
 				json = "[]";

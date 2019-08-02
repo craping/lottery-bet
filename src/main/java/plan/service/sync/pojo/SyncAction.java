@@ -1,6 +1,7 @@
 package plan.service.sync.pojo;
 
-  
+import plan.server.BaseServer;
+
 /**  
 * @ClassName: SyncAction  
 * @Description: 同步消息操作枚举
@@ -8,21 +9,25 @@ package plan.service.sync.pojo;
 * @date 2019年3月18日  
 *    
 */  
+
+public interface SyncAction {
+
+	interface Action {}
+	
+	enum LOTTERY implements Action {
+		//下注
+		BET,
+		//撤销
+		REVOKE
+    }
+	
+    enum USER implements Action {
+    	//更新计划期数
+    	UPDATE
+    }
     
-public enum SyncAction {
-	  
-	/**  添加操作 */  
-	ADD,
-	/**  修改操作 */  
-	MOD,
-	/**  删除操作 */  
-	DEL,
-	/**  设置操作 */  
-	SET,
-	/** 注销用户 */
-	DESTROY,
-	/** 开启关闭机器人 */
-	LOCK,
-	/** 修改服务时间 */
-	SERVER_TIME
+    public static void main(String[] args) throws Exception {
+    	SyncMsg msg = new SyncMsg(SyncAction.LOTTERY.BET);
+    	System.out.println(BaseServer.JSON_MAPPER.writeValueAsString(msg));
+	}
 }

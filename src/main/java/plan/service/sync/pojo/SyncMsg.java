@@ -1,27 +1,27 @@
 package plan.service.sync.pojo;
 
 public class SyncMsg {
-    
-	private SyncBiz biz;
-	
-	private SyncAction action;
-	
+
+	private String biz;
+
+	private String action;
+
 	private Object data;
 
-	public SyncBiz getBiz() {
+	public SyncMsg(SyncAction.Action action) {
+		
+		if (action != null) {
+			this.biz = action.getClass().getSimpleName();
+			this.action = action.toString();
+		}
+	}
+
+	public String getBiz() {
 		return biz;
 	}
 
-	public void setBiz(SyncBiz biz) {
-		this.biz = biz;
-	}
-
-	public SyncAction getAction() {
+	public String getAction() {
 		return action;
-	}
-
-	public void setAction(SyncAction action) {
-		this.action = action;
 	}
 
 	public Object getData() {
@@ -31,5 +31,5 @@ public class SyncMsg {
 	public void setData(Object data) {
 		this.data = data;
 	}
-	
+
 }

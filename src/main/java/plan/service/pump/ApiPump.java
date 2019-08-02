@@ -29,6 +29,7 @@ import net.sf.json.JSONObject;
 import plan.HttpServer;
 import plan.service.param.TokenParam;
 import plan.service.sync.SyncContext;
+import plan.service.sync.pojo.SyncAction;
 import plan.service.sync.pojo.SyncMsg;
 
 @Pump("api")
@@ -89,7 +90,7 @@ public class ApiPump extends DataPump<FullHttpRequest, Channel> {
 		}
 	)
 	public Errcode put (JSONObject params) throws ErrcodeException {
-		SyncMsg msg = new SyncMsg();
+		SyncMsg msg = new SyncMsg(SyncAction.LOTTERY.BET);
 		msg.setData(params.getString("msg"));
 		SyncContext.toMsg(params.getString("token"), msg);
 		return new DataResult(Errors.OK);
