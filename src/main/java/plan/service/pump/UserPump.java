@@ -50,7 +50,8 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		params= {
 			@Parameter(value="userName",  desc="登录名"),
 			@Parameter(value="userPwd",  desc="密码"),
-			@Parameter(value="endTime",  desc="服务时间")
+			@Parameter(value="endTime",  desc="服务时间"),
+			@Parameter(value="periods",  desc="初始期数")
 		}
 	)
 	public Errcode addUser (JSONObject params) throws ErrcodeException {
@@ -59,6 +60,7 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		user.setUserPwd(Coder.encryptMD5(params.getString("userPwd")));
 		user.setCreateTime(Tools.getTimestamp());
 		user.setEndTime(Tools.dateToStamp(params.getString("endTime") + " 00:00:00"));
+		user.setPeriods(params.getInt("periods"));
 		user.setState(true);
 		userServer.insert(user);
 		return new DataResult(Errors.OK);
