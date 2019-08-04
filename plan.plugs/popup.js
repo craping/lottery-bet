@@ -29,28 +29,30 @@ $(function(){
 				let loginForm = this.forms.loginForm;
 				loginForm.isLogin = true;
 				let vue = this;
-				Store.set("token", "data.info.token");
-				loginForm.isLogin = false;
-				bgPage.User = vue.user = {
-					token:"data.info.token",
-					userName:"Crap",
-					regTime:1563635998330,
-					serverEnd:1563635998330,
-					locked:false
-				};
-				bgPage.Syc.sync();
-				// bgPage.User.login(
-				// 	loginForm.login_name, loginForm.login_pwd, 
-				// 	function(data){
-				// 		loginForm.isLogin = false;
-				// 		console.log(data.info);
-				// 		vue.user = data.info;
-				// 	},
-				// 	function(data){
-				// 		loginForm.isLogin = false;
-				// 		notify("操作提示", {body:data.msg}, 3000);
-				// 	}
-				// );
+
+				// Store.set("token", "data.info.token");
+				// loginForm.isLogin = false;
+				// bgPage.User = vue.user = {
+				// 	token:"data.info.token",
+				// 	userName:"Crap",
+				// 	regTime:1563635998330,
+				// 	serverEnd:1563635998330,
+				// 	locked:false
+				// };
+				
+				bgPage.User.login(
+					loginForm.login_name, loginForm.login_pwd, 
+					function(data){
+						bgPage.Syc.handling();
+						loginForm.isLogin = false;
+						console.log(data.info);
+						vue.user = data.info;
+					},
+					function(data){
+						loginForm.isLogin = false;
+						notify("操作提示", {body:data.msg}, 3000);
+					}
+				);
 			},
 			logout:function(e){
 				let vue = this;

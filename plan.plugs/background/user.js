@@ -1,5 +1,13 @@
 var User = {
-    token:Store.get("token"),
+	token:null,
+	setToken(token){
+		Store.set("token", token);
+		this.token = token;
+	},
+	getToken(){
+		return this.token?this.token:Store.get("token");
+	},
+	info:{},
     login:function(name, pwd, success, fail){
         Web.ajax("user/login", {
 			safe:true,
@@ -8,12 +16,8 @@ var User = {
                 login_pwd:md5(pwd)
             },
             success:function(data){
-                Store.set("token", data.info.token);
-                User.token = data.info.token;
-				User.userName = data.info.userName;
-				User.regTime = data.info.regTime;
-                User.serverEnd = data.info.serverEnd;
-                User.locked = data.info.locked;
+				Store.set("token", data.info.token);
+				User.info = data.info;
 
                 if(success)
                     success(data);
@@ -44,19 +48,16 @@ var User = {
             }
         });
     },
-    getUserInfo:function(callback){
+    getUserInfo:function(success, fail){
 		Web.ajax("user/getUserInfo", {
 			success:function(data){
-				User.userName = data.info.userName;
-				User.regTime = data.info.regTime;
-                User.serverEnd = data.info.serverEnd;
-                User.locked = data.info.locked;
-				if(callback)
-					callback(data);
+				User.info = data.info;
+				if(success)
+					success(data);
 			},
 			fail:function(data){
-				if(callback)
-					callback(data);
+				if(fail)
+					fail(data);
 			}
 		});
 	},

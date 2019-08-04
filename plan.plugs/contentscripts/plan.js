@@ -5,6 +5,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		case "bet":
 			console.log(request);
 			betMYXTT(request.bet, sendResponse);
+		case "revoke":
+			console.log(request);
+			revokeMYXTT(request.bet, sendResponse);
 		default:
 			break;
 	}
@@ -89,6 +92,88 @@ function betMYXTT(bet, sendResponse){
 			
 		}
 	}) */
+	$.ajax({
+		url: "https://www.znvz806ubg.com/api/game-lottery/add-order",
+		type: 'POST',
+		cache: false,
+		data: data,
+		success: function (response) {
+			if(response.error == 0){
+				chrome.extension.sendMessage({
+					cmd:"ack_bet",
+					bet:bet
+				});
+				console.log("%c方案["+bet.code+"]投注成功", "color:red");
+			}else{
+				chrome.extension.sendMessage({
+					cmd:"notify",
+					title:"操作提示",
+					options:{body:response.message}
+				});
+				console.log("投注失败，方案["+bet.code+"]"+response.message);
+			}
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown){
+			const json = JSON.parse(XMLHttpRequest.responseText);
+			chrome.extension.sendMessage({
+				cmd:"notify",
+				title:"操作提示",
+				options:{body:json.msg}
+			});
+			console.log("投注失败，方案["+bet.code+"]"+json.msg);
+		}
+	})
+}
+
+function betMYXTT(order, sendResponse){
+	$.ajax({
+		url: "https://www.znvz806ubg.com/api/game-lottery/search-order",
+		type: 'POST',
+		cache: false,
+		data: {
+			page: 0,
+			size: 1
+		},
+		success: function (response) {
+			if(response.error == 0 && response.data.totalCount > 0){
+				$.ajax({
+					url: "https://www.znvz806ubg.com/api/game-lottery/cancel-order",
+					type: 'POST',
+					cache: false,
+					data: {billno:response.data.list[0].billno},
+					success: function (response) {
+						if(response.error == 0){
+							chrome.extension.sendMessage({
+								cmd:"ack_bet",
+								result:true
+							});
+						}else{
+							chrome.extension.sendMessage({
+								cmd:"ack_bet",
+								result:false
+							});
+						}
+					},
+					error: function(XMLHttpRequest, textStatus, errorThrown){
+						chrome.extension.sendMessage({
+							cmd:"ack_bet",
+							result:false
+						});
+					}
+				})
+				
+			}else{
+				chrome.extension.sendMessage({
+					cmd:"ack_bet",
+					result:false
+				});
+			}
+			
+		},
+		error: function(XMLHttpRequest, textStatus, errorThrown){
+			
+		}
+	})
 	/* $.ajax({
 		url: "https://www.znvz806ubg.com/api/game-lottery/add-order",
 		type: 'POST',
@@ -119,8 +204,9 @@ function betMYXTT(bet, sendResponse){
 			});
 			console.log("投注失败，方案["+bet.code+"]"+json.msg);
 		}
-	}) */
+	})
 }
+
 
 function betDingBo(bet, sendResponse, callback){
 	const gameId = "22";
