@@ -4,12 +4,15 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import lombok.Data;
+
 /**
  * 用户
  * 
  * @author wr
  *
  */
+@Data
 @Document(collection = "plan_user")
 public class User {
 
@@ -26,50 +29,9 @@ public class User {
 	private String endTime;
 	@Field
 	private Boolean state;
+	@Field
+	private int periods;
 	/** 用户token */
 	@Field
 	private String token;
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-	public String getUserPwd() {
-		return userPwd;
-	}
-	public void setUserPwd(String userPwd) {
-		this.userPwd = userPwd;
-	}
-	public String getCreateTime() {
-		return createTime;
-	}
-	public void setCreateTime(String createTime) {
-		this.createTime = createTime;
-	}
-	public String getEndTime() {
-		return endTime;
-	}
-	public void setEndTime(String endTime) {
-		this.endTime = endTime;
-	}
-	public String getToken() {
-		return token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
-	public Boolean getState() {
-		return state;
-	}
-	public void setState(Boolean state) {
-		this.state = state;
-	}
-	
 }
