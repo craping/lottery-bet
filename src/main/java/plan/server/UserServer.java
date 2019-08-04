@@ -68,7 +68,7 @@ public class UserServer extends BaseServer {
 	 */
 	public User getUser(String userName, String userPwd) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("userInfo.userName").is(userName).and("userInfo.userPwd").is(userPwd));
+		query.addCriteria(Criteria.where("userName").is(userName).and("userPwd").is(userPwd));
 		return mongoTemplate.findOne(query, User.class);
 	}
 
@@ -97,8 +97,8 @@ public class UserServer extends BaseServer {
 	 */
 	public long changePwd(String userName, String pwd) {
 		try {
-			Query query = new Query(Criteria.where("userInfo.userName").is(userName));
-			Update update = Update.update("userInfo.userPwd", pwd);
+			Query query = new Query(Criteria.where("userName").is(userName));
+			Update update = Update.update("userPwd", pwd);
 			return mongoTemplate.updateFirst(query, update, User.class).getModifiedCount();
 		} catch (Exception e) {
 			e.printStackTrace();

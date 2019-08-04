@@ -23,7 +23,9 @@ public interface SyncAction {
 	
     enum USER implements Action {
     	//更新计划期数
-    	UPDATE
+    	UPDATE,
+    	//重置期数
+    	RESET
     }
     
     public static void main(String[] args) throws Exception {
