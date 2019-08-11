@@ -86,10 +86,12 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 				// 发起投注队列消息
 				SyncContext.toMsg(token, msg);
 				
+				// 持久化期数进度
+				user.setNowPeriods(user.getNowPeriods() - 1);
+				userServer.modifyNowPeriods(user);
+				
 				// 修改期数进度
-				String nowPeriods = (String) redisTemplate.opsForHash().get(key, "nowPeriods");
-				redisTemplate.opsForHash().put(key, "nowPeriods", 
-						String.valueOf(Integer.parseInt(nowPeriods) - 1));
+				redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
 			}
 		}
 
@@ -145,10 +147,12 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 				// 发起投注队列消息
 				SyncContext.toMsg(token, msg);
 				
+				// 持久化期数进度
+				user.setNowPeriods(user.getNowPeriods() + 1);
+				userServer.modifyNowPeriods(user);
+				
 				// 修改期数进度
-				String nowPeriods = (String) redisTemplate.opsForHash().get(key, "nowPeriods");
-				redisTemplate.opsForHash().put(key, "nowPeriods", 
-						String.valueOf(Integer.parseInt(nowPeriods) + 1));
+				redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
 			}
 		}
 		

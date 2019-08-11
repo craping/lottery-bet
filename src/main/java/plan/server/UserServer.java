@@ -88,15 +88,34 @@ public class UserServer extends BaseServer {
 	 * @param user
 	 * @return
 	 */
-	public int updateToken(User user) {
-		try {
-			Query query = new Query(Criteria.where("id").is(user.getId()));
-			Update update = Update.update("token", user.getToken());
-			return (int) mongoTemplate.updateFirst(query, update, User.class).getModifiedCount();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return 0;
+	public long updateToken(User user) {
+		Query query = new Query(Criteria.where("id").is(user.getId()));
+		Update update = Update.update("token", user.getToken());
+		return mongoTemplate.updateFirst(query, update, User.class).getModifiedCount();
+	}
+	
+	/**
+	 * 更新期数进度
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public long modifyNowPeriods(User user) {
+		Query query = new Query(Criteria.where("id").is(user.getId()));
+		Update update = Update.update("nowPeriods", user.getNowPeriods());
+		return mongoTemplate.updateFirst(query, update, User.class).getModifiedCount();
+	}
+	
+	/**
+	 * 重置期数
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public long modifyPeriods(User user) {
+		Query query = new Query(Criteria.where("id").is(user.getId()));
+		Update update = Update.update("periods", user.getPeriods());
+		return mongoTemplate.updateFirst(query, update, User.class).getModifiedCount();
 	}
 
 	/**

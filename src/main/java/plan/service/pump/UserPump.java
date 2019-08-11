@@ -35,6 +35,9 @@ import plan.data.redis.RedisUtil;
 import plan.server.UserServer;
 import plan.service.CustomErrors;
 import plan.service.param.TokenParam;
+import plan.service.sync.SyncContext;
+import plan.service.sync.pojo.SyncAction;
+import plan.service.sync.pojo.SyncMsg;
 import plan.service.utils.Coder;
 import plan.service.utils.Tools;
 
@@ -135,10 +138,17 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 	@Pipe("userInfo")
 	@BarScreen(
 		desc="获取用户信息",
-		params = {}
+		params = {
+			@Parameter(value="token",  desc="用户token"),
+		}
 	)
 	public Errcode userInfo (JSONObject params) throws ErrcodeException {
-		return new DataResult(Errors.OK, new Data(userServer.getUsers()));
+		String key = "user_" + params.getString("token");
+		if (!RedisUtil.exists(key)) 
+			return new Result(CustomErrors.USER_NOT_LOGIN);
+		
+		Map<Object, Object> userMap = redisTemplate.opsForHash().entries(key);
+		return new DataResult(Errors.OK, new Data(userMap));
 	}
 	
 	@Pipe("onlineList")
@@ -156,7 +166,67 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		return new DataResult(Errors.OK, new Data(users));
 	}
 	
+	@Pipe("resetPeriods")
+	@BarScreen(
+		desc="重置期数",
+		params = {
+			@Parameter(value="id",  desc="用户id"),
+		}
+	)
+	public Errcode resetPeriods(JSONObject params) {
+		User user = userServer.find(params.getString("id"));
+		if (user == null)
+			return new Result(CustomErrors.USER_NOT_LOGIN);
+		
+		String key = "user_" + user.getToken();
+		if (!RedisUtil.exists(key))
+			return new Result(CustomErrors.USER_NOT_LOGIN);
+		
+		// 重置期数持久化
+		user.setNowPeriods(0);
+		userServer.modifyNowPeriods(user);
+		
+		redisTemplate.opsForHash().put(key, "nowPeriods", "0");
+
+		// 推送队列消息
+		SyncMsg msg = new SyncMsg(SyncAction.USER.RESET);
+		SyncContext.toMsg(user.getToken(), msg);
+		
+		return new DataResult(Errors.OK);
+	}
 	
+	@Pipe("modifyPeriods")
+	@BarScreen(
+		desc="修改期数",
+		params = {
+			@Parameter(value="id",  desc="用户id"),
+			@Parameter(value="periods",  desc="期数"),
+		}
+	)
+	public Errcode modifyPeriods(JSONObject params) {
+		User user = userServer.find(params.getString("id"));
+		if (user == null)
+			return new Result(CustomErrors.USER_NOT_LOGIN);
+		
+		String key = "user_" + user.getToken();
+		if (!RedisUtil.exists(key))
+			return new Result(CustomErrors.USER_NOT_LOGIN);
+		
+		// 重置期数持久化
+		user.setPeriods(params.getInt("periods"));
+		userServer.modifyPeriods(user);
+		
+		redisTemplate.opsForHash().put(key, "periods", params.getString("periods"));
+
+		// 推送队列消息
+		SyncMsg msg = new SyncMsg(SyncAction.USER.UPDATE);
+		Map<String, Object> data = new HashMap<>();
+		data.put("count", params.getInt("periods"));
+		msg.setData(data);
+		SyncContext.toMsg(user.getToken(), msg);
+		
+		return new DataResult(Errors.OK);
+	}
 	
 	@Pipe("logout")
 	@BarScreen(
@@ -170,7 +240,6 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		redisTemplate.delete(key); // 删除缓存
 		return new DataResult(Errors.OK);
 	}
-	
 	
 	@Pipe("heartbeat")
 	@BarScreen(
