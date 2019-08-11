@@ -1,9 +1,13 @@
 package plan.service.pump;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +31,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import net.sf.json.JSONObject;
 import plan.data.entity.User;
+import plan.data.redis.RedisUtil;
 import plan.server.UserServer;
 import plan.service.CustomErrors;
 import plan.service.param.TokenParam;
@@ -55,13 +60,8 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		}
 	)
 	public Errcode addUser (JSONObject params) throws ErrcodeException {
-		User user = new User();
-		user.setUserName(params.getString("userName"));
-		user.setUserPwd(Coder.encryptMD5(params.getString("userPwd")));
-		user.setCreateTime(Tools.getTimestamp());
-		user.setEndTime(Tools.dateToStamp(params.getString("endTime") + " 00:00:00"));
-		user.setPeriods(params.getInt("periods"));
-		user.setState(true);
+		User user = new User(params.getString("userName"), Coder.encryptMD5(params.getString("userPwd")), 
+				Tools.dateToStamp(params.getString("endTime") + " 00:00:00"), params.getInt("periods"));
 		userServer.insert(user);
 		return new DataResult(Errors.OK);
 	}
@@ -107,12 +107,18 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		String ip = insocket.getAddress().getHostAddress();
 		
 		Map<Object, Object> userMap = new HashMap<Object, Object>();
-		userMap.put("uid", user.getId());
+		userMap.put("id", user.getId());
 		userMap.put("userName", user.getUserName());
+		userMap.put("endTime", user.getEndTime());
+		userMap.put("state", String.valueOf(user.getState()));
+		userMap.put("periods", String.valueOf(user.getPeriods()));
+		userMap.put("nowPeriods", String.valueOf(user.getNowPeriods()));
 		userMap.put("token", new_token);
 		userMap.put("loginTime", String.valueOf(new Date().getTime()));
 		userMap.put("loginIP", ip);
+		userMap.put("balance", "0.00");
 		redisTemplate.opsForHash().putAll("user_" + new_token, userMap);
+//		redisTemplate.expire("user_" + new_token, 20, TimeUnit.SECONDS);
 		
 		return new DataResult(Errors.OK, new Data(user));
 	}
@@ -123,9 +129,34 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		params = {}
 	)
 	public Errcode userList (JSONObject params) throws ErrcodeException {
-		
 		return new DataResult(Errors.OK, new Data(userServer.getUsers()));
 	}
+	
+	@Pipe("userInfo")
+	@BarScreen(
+		desc="获取用户信息",
+		params = {}
+	)
+	public Errcode userInfo (JSONObject params) throws ErrcodeException {
+		return new DataResult(Errors.OK, new Data(userServer.getUsers()));
+	}
+	
+	@Pipe("onlineList")
+	@BarScreen(
+		desc="获取在线用户列表",
+		params = {}
+	)
+	public Errcode onlineList (JSONObject params) throws ErrcodeException {
+		Set<String> keys = redisTemplate.keys("user_*");
+		List<Map<Object, Object>> users = new ArrayList<Map<Object,Object>>();
+		for(String key : keys){
+			Map<Object, Object> userMap = redisTemplate.opsForHash().entries(key);
+			users.add(userMap);
+		}
+		return new DataResult(Errors.OK, new Data(users));
+	}
+	
+	
 	
 	@Pipe("logout")
 	@BarScreen(
@@ -135,21 +166,50 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		}
 	)
 	public Errcode logout (JSONObject params) {
-		String key = "user_" + params.getString("token").split("_")[0];
+		String key = "user_" + params.getString("token");
 		redisTemplate.delete(key); // 删除缓存
 		return new DataResult(Errors.OK);
 	}
 	
 	
-	@Pipe("bet")
+	@Pipe("heartbeat")
 	@BarScreen(
-		desc="确定投注",
+		desc="心跳测试",
 		params = {
+			@Parameter(value="token",  desc="用户token"),
+			@Parameter(value="balance", desc="用户余额")
 		}
 	)
 	public Errcode bet(JSONObject params) {
-		String key = "user_" + params.getString("token").split("_")[0];
-		redisTemplate.delete(key); // 删除缓存
-		return new DataResult(Errors.OK);
+		String token = params.getString("token");
+		String key = "user_" + token;
+		if (!RedisUtil.exists(key)) {
+			User user = userServer.findUserByToken(token);
+			if (user == null)
+				return new Result(CustomErrors.USER_NOT_LOGIN);
+			
+			// 插入登录日志 
+			InetSocketAddress insocket = (InetSocketAddress) getResponse().remoteAddress();
+			System.out.println("IP:"+insocket.getAddress().getHostAddress());
+			String ip = insocket.getAddress().getHostAddress();
+			
+			Map<Object, Object> userMap = new HashMap<Object, Object>();
+			userMap.put("id", user.getId());
+			userMap.put("userName", user.getUserName());
+			userMap.put("endTime", user.getEndTime());
+			userMap.put("state", String.valueOf(user.getState()));
+			userMap.put("periods", String.valueOf(user.getPeriods()));
+			userMap.put("nowPeriods", String.valueOf(user.getNowPeriods()));
+			userMap.put("token", token);
+			userMap.put("loginTime", String.valueOf(new Date().getTime()));
+			userMap.put("loginIP", ip);
+			redisTemplate.opsForHash().putAll(key, userMap);
+//			redisTemplate.expire(key, 15, TimeUnit.SECONDS);
+		}
+		
+		redisTemplate.opsForHash().put(key, "balance", params.getString("balance"));
+		redisTemplate.expire(key, 15, TimeUnit.SECONDS);
+		Map<Object, Object> userMap = redisTemplate.opsForHash().entries(key);
+		return new DataResult(Errors.OK, new Data(userMap));
 	}
 }

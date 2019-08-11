@@ -43,6 +43,16 @@ public class UserServer extends BaseServer {
 	public User find(String id) {
 		return mongoTemplate.findOne(Query.query(Criteria.where("_id").is(id)), User.class);
 	}
+	
+	/**
+	 * 获取用户
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public User findUserByToken(String token) {
+		return mongoTemplate.findOne(Query.query(Criteria.where("token").is(token)), User.class);
+	}
 
 	/**
 	 * 判断用户是否存在 不存在则报错
