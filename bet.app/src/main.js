@@ -4,8 +4,6 @@ import Vant from 'vant';
 import { router } from './router';
 import http from '@/libs/axios'
 import config from '@/config'
-import { getParams } from '@/libs/util'
-import { handling } from '@/libs/sync'
 
 import 'vant/lib/index.css';
 import clipboard from 'clipboard';
