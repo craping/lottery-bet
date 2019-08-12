@@ -63,7 +63,7 @@ public class BettingServer extends BaseServer {
 	}
 
 	/**
-	 * 更新用户信息
+	 * 更新投注状态
 	 * 
 	 * @param user
 	 * @return

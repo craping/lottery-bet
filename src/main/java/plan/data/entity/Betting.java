@@ -21,7 +21,7 @@ public class Betting {
 	private int ds;
 
 	/**
-	 * 1已中奖 2未中奖 3未开奖 4已撤销
+	 * 0已中奖 1未中奖 2未开奖 3已撤销 4等待开奖
 	 */
 	@Field
 	private int state;

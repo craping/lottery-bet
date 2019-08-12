@@ -59,6 +59,43 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		return new DataResult(Errors.OK, new Data(bettingServer.getBettings()));
 	}
 	
+	@Pipe("openBet")
+	@BarScreen(
+		desc="开奖",
+		params = {
+			@Parameter(value="id",  desc="投注id"),
+			@Parameter(value="index",  desc="标识"),
+		}
+	)
+	public Errcode openBet(JSONObject params) throws ErrcodeException {
+		Betting betting = bettingServer.getBetting(params.getString("id"));
+		int state = params.getInt("index"); 
+		if (state == 0) {
+			// 已中奖 重置用户投注信息
+			String ids = betting.getUserIds();
+			for(String id : ids.split(",")) {
+				User user = userServer.find(id);
+				String token = user.getToken();
+				String key = "user_" + token;
+				if (RedisUtil.exists(key)) {
+					// 发起投注队列消息
+					//SyncContext.toMsg(token, msg);
+					
+					// 持久化期数进度
+					user.setNowPeriods(0);
+					userServer.modifyNowPeriods(user);
+					
+					// 修改期数进度
+					redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
+				}
+			}
+		}
+		
+		betting.setState(state);
+		bettingServer.modifyBetting(betting);
+		return new DataResult(Errors.OK, new Data(bettingServer.getBettings()));
+	}
+	
 	@Pipe("cancel")
 	@BarScreen(
 		desc="撤销投注",
@@ -71,7 +108,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		if (betting == null)
 			return new Result(CustomErrors.USER_BETTING_ERR);
 		
-		betting.setState(4);
+		betting.setState(3);
 		bettingServer.modifyBetting(betting);
 		
 		// 推送队列消息
@@ -118,7 +155,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		betting.setPosition(params.getInt("position"));
 		betting.setDs(params.getInt("ds"));
 		betting.setUserIds(ids);
-		betting.setState(3);
+		betting.setState(4);
 		betting.setCreateTime(Tools.getTimestamp());
 		betting = bettingServer.insert(betting);
 		
@@ -146,16 +183,33 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 			if (RedisUtil.exists(key)) {
 				// 发起投注队列消息
 				SyncContext.toMsg(token, msg);
-				
-				// 持久化期数进度
-				user.setNowPeriods(user.getNowPeriods() + 1);
-				userServer.modifyNowPeriods(user);
-				
-				// 修改期数进度
-				redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
 			}
 		}
 		
+		return new DataResult(Errors.OK);
+	}
+	
+	@Pipe("syncBetting")
+	@BarScreen(
+		desc="投注成功同步",
+		params= {
+			@Parameter(value="token",  desc="用户token")
+		}
+	)
+	public Errcode syncBetting(JSONObject params) throws ErrcodeException {
+		String token = params.getString("token");
+		String key = "user_" + token;
+		if (RedisUtil.exists(key)) {
+			String id = String.valueOf(redisTemplate.opsForHash().get(key, "id"));
+			User user = userServer.find(id);
+			
+			// 持久化期数进度
+			user.setNowPeriods(user.getNowPeriods() + 1);
+			userServer.modifyNowPeriods(user);
+			
+			// 修改期数进度
+			redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
+		}
 		return new DataResult(Errors.OK);
 	}
 	
