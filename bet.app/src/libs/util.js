@@ -56,16 +56,16 @@ export const filter = (data, argumentObj) => {
 export const betStateDesc = (state) => {
   let desc = '等待开奖';
   switch (state) {
-    case 1:
+    case 0:
       desc = '已中奖';
       break
-    case 2:
+    case 1:
       desc = '未中奖';
       break
-    case 3:
-      desc = '等待开奖';
+    case 2:
+      desc = '未开奖';
       break
-    case 4:
+    case 3:
       desc = '已撤销';
       break
   }
@@ -73,18 +73,18 @@ export const betStateDesc = (state) => {
 }
 
 export const betStateType = (state) => {
-  let desc = '等待开奖';
+  let desc = 'success';
   switch (state) {
-    case 1:
+    case 0:
       desc = 'danger';
       break
-    case 2:
+    case 1:
       desc = 'default';
       break
-    case 3:
+    case 2:
       desc = 'success';
       break
-    case 4:
+    case 3:
       desc = 'primary';
       break
   }

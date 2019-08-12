@@ -79,9 +79,9 @@ export default {
                 if (!data.result) {
                     Toast.success(data.msg);
                     this.loadingBet = false;
-                    //setTimeout(() => {
-                      //  this.addPopup = false;
-                    //}, 500);
+                    setTimeout(() => {
+                        this.$router.push({path: '/betting'})
+                    }, 1000);
                 } else {
                     Toast.fail(data.msg);
                     this.loadingBet = false;

@@ -5,8 +5,8 @@
     </van-nav-bar>
     <van-search placeholder="请输入搜索关键词" v-model="keyword" />
     <van-list v-model="loading" :finished="finished" finished-text="没有更多了" >
-        <van-swipe-cell v-for="e in keyMap" >
-            <van-cell-group v-bind="e">
+        <van-swipe-cell v-for="e in keyMap" :key="e.id" >
+            <van-cell-group>
                 <van-cell :title="e.periods" :value="showInfo(e.position,e.ds)" @click="showContent(e.id)">
                     <template slot="title">
                         <span class="custom-title">{{e.periods}}  </span>
@@ -15,8 +15,11 @@
                 </van-cell>
             </van-cell-group>
             <span slot="right">
-                <van-button v-if="e.state==3" type="danger" style="float:right;width:75px" square @click="delDialog(e.id)">
-                    撤销计划
+                <van-button type="info" style="float:left;width:75px" square @click="modify(e.id)">
+                    修改
+                </van-button>
+                <van-button type="danger" style="float:right;width:75px" square @click="delDialog(e.id)">
+                    撤单
                 </van-button>
             </span>
         </van-swipe-cell>
@@ -27,10 +30,25 @@
         <div class="van-dialog__content"><div class="van-dialog__message">确定撤销计划吗？</div></div>
     </van-dialog>
 
+    <!-- 修改状态 -->
+    <van-action-sheet v-model="sheetShow" :actions="actions" cancel-text="取消" @select="onSelect" @cancel="onCancel"/>
+
     <footerNav></footerNav>
 </section>
 </template>
 
 <script src="./betting.js"></script>
 <style>
+.sheet_success{
+    background-color: red;
+    color: white;
+}
+.sheet_fail{
+    background-color: gray;
+    color: white;
+}
+.sheet_unopen{
+    background-color:#07c160;
+    color: white;
+}
 </style>

@@ -13,7 +13,13 @@ export default {
             finished: true,
             bettingId: '',
             isShow: false,
-            token: ''
+            token: '',
+            sheetShow: false,
+            actions: [
+                { name: '已中奖' , className: 'sheet_success'},
+                { name: '未中奖' , className: 'sheet_fail'},
+                { name: '未开奖' , className: 'sheet_unopen'},
+            ]
         }
     },
     computed: {
@@ -29,6 +35,28 @@ export default {
         this.getBettings();
     },
     methods: {
+        modify(id) {
+            this.bettingId = id;
+            this.sheetShow = true;
+        },
+        onCancel() {
+            this.sheetShow = false;
+        },
+        onSelect(item, index) {
+            const data = {id: this.bettingId, index: index}
+            this.$http.post("bet/openBet?format=json", data).then(response => {
+                const data = response.data;
+                if (!data.result) {
+                    this.getBettings();
+                } else {
+                    Toast.fail(data.msg);
+                }
+                this.sheetShow = false;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
         goback() {
             this.$router.go(-1);
         },
