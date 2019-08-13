@@ -23,16 +23,6 @@ $(function(){
 				loginForm.isLogin = true;
 				let vue = this;
 				
-				// Store.set("token", "data.info.token");
-				// loginForm.isLogin = false;
-				// bgPage.User = vue.user = {
-				// 	token:"data.info.token",
-				// 	userName:"Crap",
-				// 	regTime:1563635998330,
-				// 	serverEnd:1563635998330,
-				// 	locked:false
-				// };
-				
 				bgPage.User.login(
 					loginForm.login_name, loginForm.login_pwd, 
 					function(data){
@@ -45,6 +35,7 @@ $(function(){
 						notify("操作提示", {body:data.msg}, 3000);
 					}
 				);
+				return;
 			},
 			logout:function(e){
 				let vue = this;
