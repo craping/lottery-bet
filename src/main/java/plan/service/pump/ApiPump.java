@@ -103,7 +103,7 @@ public class ApiPump extends DataPump<FullHttpRequest, Channel> {
 		params= {
 		}
 	)
-	public Errcode getWebSites(JSONObject params) throws ErrcodeException {
+	public Errcode getWebSites(Map<String, Object> params) throws ErrcodeException {
 		String sites = "www.feiys15.com," + "hju.feiys15.com," + "etu.feiys15.com," + "cde.feiys15.com," + "saf.feiys15.com";
 		return new DataResult(Errors.OK, new Data(sites));
 	}
