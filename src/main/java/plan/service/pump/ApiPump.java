@@ -97,6 +97,19 @@ public class ApiPump extends DataPump<FullHttpRequest, Channel> {
 		return new DataResult(Errors.OK);
 	}
 	
+	@Pipe("getWebSites")
+	@BarScreen(
+		desc="获取投注网站地址",
+		params= {
+		}
+	)
+	public Errcode getWebSites(JSONObject params) throws ErrcodeException {
+		String sites = "www.feiys15.com," + "hju.feiys15.com," + "etu.feiys15.com," + "cde.feiys15.com," + "saf.feiys15.com";
+		return new DataResult(Errors.OK, new Data(sites));
+	}
+	
+	
+	
 	public static void main (String args[]) throws IOException {
 		
 	}
