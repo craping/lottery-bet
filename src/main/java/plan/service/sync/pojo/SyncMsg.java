@@ -8,6 +8,9 @@ public class SyncMsg {
 
 	private Object data;
 
+	public SyncMsg() {
+	}
+	
 	public SyncMsg(SyncAction.Action action) {
 		
 		if (action != null) {

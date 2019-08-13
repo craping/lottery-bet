@@ -2,6 +2,7 @@ package plan.service.sync;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 import plan.data.redis.RedisUtil;
+import plan.service.sync.pojo.SyncAction;
 import plan.service.sync.pojo.SyncMsg;
 
 @Component
@@ -179,4 +181,12 @@ public class SyncContext implements SchedulingConfigurer {
 		}
 	}
 
+	public static void main(String[] args) throws Exception {
+		SyncMsg msg = new SyncMsg(SyncAction.LOTTERY.BET);
+		Map<String, Object> data = new HashMap<>();
+		msg.setData(1);
+		System.out.println();
+		MAPPER.readValue(MAPPER.writeValueAsString(msg), SyncMsg.class);
+		
+	}
 }
