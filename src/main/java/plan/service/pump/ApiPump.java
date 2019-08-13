@@ -23,9 +23,10 @@ import org.crap.jrain.core.validate.annotation.Parameter;
 import org.crap.jrain.core.validate.security.component.Coder;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
+
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
-import net.sf.json.JSONObject;
 import plan.HttpServer;
 import plan.service.param.TokenParam;
 import plan.service.sync.SyncContext;

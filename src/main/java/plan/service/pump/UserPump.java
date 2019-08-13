@@ -27,9 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
+
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
-import net.sf.json.JSONObject;
 import plan.data.entity.User;
 import plan.data.redis.RedisUtil;
 import plan.server.UserServer;
@@ -64,7 +65,7 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 	)
 	public Errcode addUser (JSONObject params) throws ErrcodeException {
 		User user = new User(params.getString("userName"), Coder.encryptMD5(params.getString("userPwd")), 
-				Tools.dateToStamp(params.getString("endTime") + " 00:00:00"), params.getInt("periods"));
+				Tools.dateToStamp(params.getString("endTime") + " 00:00:00"), params.getIntValue("periods"));
 		userServer.insert(user);
 		return new DataResult(Errors.OK);
 	}
@@ -213,7 +214,7 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 			return new Result(CustomErrors.USER_NOT_LOGIN);
 		
 		// 重置期数持久化
-		user.setPeriods(params.getInt("periods"));
+		user.setPeriods(params.getIntValue("periods"));
 		userServer.modifyPeriods(user);
 		
 		redisTemplate.opsForHash().put(key, "periods", params.getString("periods"));
@@ -221,7 +222,7 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		// 推送队列消息
 		SyncMsg msg = new SyncMsg(SyncAction.USER.UPDATE);
 		Map<String, Object> data = new HashMap<>();
-		data.put("count", params.getInt("periods"));
+		data.put("count", params.getIntValue("periods"));
 		msg.setData(data);
 		SyncContext.toMsg(user.getToken(), msg);
 		

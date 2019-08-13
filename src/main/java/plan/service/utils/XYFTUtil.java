@@ -9,7 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import net.sf.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 
 
 public class XYFTUtil {
@@ -46,6 +46,6 @@ public class XYFTUtil {
 	}
 	
 	public static void main(String args[]) throws IOException {
-		System.out.println(JSONObject.fromObject(XYFTresult()));
+		System.out.println(JSONObject.toJSON(XYFTresult()));
 	}
 }

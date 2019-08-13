@@ -22,9 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
+
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
-import net.sf.json.JSONObject;
 import plan.data.entity.Betting;
 import plan.data.entity.User;
 import plan.data.redis.RedisUtil;
@@ -69,7 +70,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 	)
 	public Errcode openBet(JSONObject params) throws ErrcodeException {
 		Betting betting = bettingServer.getBetting(params.getString("id"));
-		int state = params.getInt("index"); 
+		int state = params.getIntValue("index"); 
 		if (state == 0) {
 			// 已中奖 重置用户投注信息
 			String ids = betting.getUserIds();
@@ -152,8 +153,8 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		
 		Betting betting = new Betting();
 		betting.setPeriods(params.getString("periods"));
-		betting.setPosition(params.getInt("position"));
-		betting.setDs(params.getInt("ds"));
+		betting.setPosition(params.getIntValue("position"));
+		betting.setDs(params.getIntValue("ds"));
 		betting.setUserIds(ids);
 		betting.setState(4);
 		betting.setCreateTime(Tools.getTimestamp());
@@ -165,7 +166,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		betMap.put("position", params.getString("position"));
 		betMap.put("ds", params.getString("ds"));
 		
-		String code = params.getInt("ds") == 1? "单":"双";
+		String code = params.getIntValue("ds") == 1? "单":"双";
 		betMap.put("code", code);
 		betMap.put("ids", ids);
 		redisTemplate.opsForHash().putAll("betting_info", betMap);		
@@ -173,7 +174,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		SyncMsg msg = new SyncMsg(SyncAction.LOTTERY.BET);
 		Map<String, Object> data = new HashMap<>();
 		data.put("code", code);
-		data.put("position", params.getInt("position"));
+		data.put("position", params.getIntValue("position"));
 		msg.setData(data);
 		
 		for(String id : Arrays.asList(ids.split(","))) {
