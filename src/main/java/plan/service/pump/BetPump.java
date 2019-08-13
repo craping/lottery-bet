@@ -123,6 +123,28 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 			if (RedisUtil.exists(key)) {
 				// 发起投注队列消息
 				SyncContext.toMsg(token, msg);
+			}
+		}
+
+		return new DataResult(Errors.OK);
+	}
+	
+	@Pipe("syncCancel")
+	@BarScreen(
+		desc="撤单同步",
+		params= {
+			@Parameter(value="token",  desc="用户token"),
+			@Parameter(value="success",  desc="撤单成功标识"),
+		}
+	)
+	public Errcode syncCancel(JSONObject params) throws ErrcodeException {
+		Boolean success = params.getBoolean("success");
+		if (success) {
+			String token = params.getString("token");
+			String key = "user_" + token;
+			if (RedisUtil.exists(key)) {
+				String id = String.valueOf(redisTemplate.opsForHash().get(key, "id"));
+				User user = userServer.find(id);
 				
 				// 持久化期数进度
 				user.setNowPeriods(user.getNowPeriods() - 1);
@@ -131,10 +153,10 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 				// 修改期数进度
 				redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
 			}
-		}
-
+		} 		
 		return new DataResult(Errors.OK);
 	}
+	
 	
 	@Pipe("betting")
 	@BarScreen(
