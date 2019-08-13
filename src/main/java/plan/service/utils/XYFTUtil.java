@@ -46,6 +46,6 @@ public class XYFTUtil {
 	}
 	
 	public static void main(String args[]) throws IOException {
-		System.out.println(JSONObject.toJSON(XYFTresult()));
+		System.out.println(JSONObject.toJSONString(XYFTresult()));
 	}
 }
