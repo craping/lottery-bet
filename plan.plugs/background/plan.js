@@ -90,7 +90,7 @@ var Plan = {
 			me.prize(codes);
 		}else{
 			setTimeout(() => {
-				open();
+				me.open();
 			}, 500);
 		}
 	},

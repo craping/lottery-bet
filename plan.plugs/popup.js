@@ -35,7 +35,6 @@ $(function(){
 						notify("操作提示", {body:data.msg}, 3000);
 					}
 				);
-				return;
 			},
 			logout:function(e){
 				let vue = this;
