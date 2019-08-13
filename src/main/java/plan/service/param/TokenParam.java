@@ -39,7 +39,7 @@ public class TokenParam extends StringParam implements SingleParam {
 		if (token.isEmpty())
 			return new Result(CustomErrors.USER_PARAM_NULL.setArgs("token"));
 		
-		String key = "user_" + token.split("_")[0];
+		String key = "user_" + token;
 		Jedis jedis = null;
 		try {
 			jedis = RedisUtil.getJedis();

@@ -238,6 +238,13 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 	)
 	public Errcode logout (JSONObject params) {
 		String key = "user_" + params.getString("token");
+		
+		User user = userServer.findUserByToken(params.getString("token"));
+		if (user != null) {
+			user.setToken("");
+			userServer.updateToken(user);
+		}
+		
 		redisTemplate.delete(key); // 删除缓存
 		return new DataResult(Errors.OK);
 	}

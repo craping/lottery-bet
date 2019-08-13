@@ -101,6 +101,7 @@ public class ApiPump extends DataPump<FullHttpRequest, Channel> {
 	@BarScreen(
 		desc="获取投注网站地址",
 		params= {
+			@Parameter(type=TokenParam.class)
 		}
 	)
 	public Errcode getWebSites(Map<String, Object> params) throws ErrcodeException {
