@@ -250,7 +250,7 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 			@Parameter(value="balance", desc="用户余额")
 		}
 	)
-	public Errcode bet(JSONObject params) {
+	public Errcode heartbeat(JSONObject params) {
 		String token = params.getString("token");
 		String key = "user_" + token;
 		if (!RedisUtil.exists(key)) {

@@ -194,23 +194,27 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 	@BarScreen(
 		desc="投注成功同步",
 		params= {
-			@Parameter(value="token",  desc="用户token")
+			@Parameter(value="token",  desc="用户token"),
+			@Parameter(value="success",  desc="投注成功标识"),
 		}
 	)
 	public Errcode syncBetting(JSONObject params) throws ErrcodeException {
-		String token = params.getString("token");
-		String key = "user_" + token;
-		if (RedisUtil.exists(key)) {
-			String id = String.valueOf(redisTemplate.opsForHash().get(key, "id"));
-			User user = userServer.find(id);
-			
-			// 持久化期数进度
-			user.setNowPeriods(user.getNowPeriods() + 1);
-			userServer.modifyNowPeriods(user);
-			
-			// 修改期数进度
-			redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
-		}
+		Boolean success = params.getBoolean("success");
+		if (success) {
+			String token = params.getString("token");
+			String key = "user_" + token;
+			if (RedisUtil.exists(key)) {
+				String id = String.valueOf(redisTemplate.opsForHash().get(key, "id"));
+				User user = userServer.find(id);
+				
+				// 持久化期数进度
+				user.setNowPeriods(user.getNowPeriods() + 1);
+				userServer.modifyNowPeriods(user);
+				
+				// 修改期数进度
+				redisTemplate.opsForHash().put(key, "nowPeriods", String.valueOf(user.getNowPeriods()));
+			}
+		} 		
 		return new DataResult(Errors.OK);
 	}
 	
