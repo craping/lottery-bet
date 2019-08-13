@@ -122,7 +122,6 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 		userMap.put("loginIP", ip);
 		userMap.put("balance", "0.00");
 		redisTemplate.opsForHash().putAll("user_" + new_token, userMap);
-//		redisTemplate.expire("user_" + new_token, 20, TimeUnit.SECONDS);
 		
 		return new DataResult(Errors.OK, new Data(user));
 	}
@@ -221,9 +220,7 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 
 		// 推送队列消息
 		SyncMsg msg = new SyncMsg(SyncAction.USER.UPDATE);
-		Map<String, Object> data = new HashMap<>();
-		data.put("count", params.getIntValue("periods"));
-		msg.setData(data);
+		msg.setData(params.getIntValue("periods"));
 		SyncContext.toMsg(user.getToken(), msg);
 		
 		return new DataResult(Errors.OK);
@@ -259,34 +256,19 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 	)
 	public Errcode heartbeat(JSONObject params) {
 		String token = params.getString("token");
-		String key = "user_" + token;
+		String key = "user_" + token + "_ON";
 		if (!RedisUtil.exists(key)) {
-			User user = userServer.findUserByToken(token);
-			if (user == null)
-				return new Result(CustomErrors.USER_NOT_LOGIN);
-			
-			// 插入登录日志 
-			InetSocketAddress insocket = (InetSocketAddress) getResponse().remoteAddress();
-			System.out.println("IP:"+insocket.getAddress().getHostAddress());
-			String ip = insocket.getAddress().getHostAddress();
-			
 			Map<Object, Object> userMap = new HashMap<Object, Object>();
-			userMap.put("id", user.getId());
-			userMap.put("userName", user.getUserName());
-			userMap.put("endTime", user.getEndTime());
-			userMap.put("state", String.valueOf(user.getState()));
-			userMap.put("periods", String.valueOf(user.getPeriods()));
-			userMap.put("nowPeriods", String.valueOf(user.getNowPeriods()));
 			userMap.put("token", token);
 			userMap.put("loginTime", String.valueOf(new Date().getTime()));
-			userMap.put("loginIP", ip);
 			redisTemplate.opsForHash().putAll(key, userMap);
-//			redisTemplate.expire(key, 15, TimeUnit.SECONDS);
 		}
 		
-		redisTemplate.opsForHash().put(key, "balance", params.getString("balance"));
+		// 更新余额
+		redisTemplate.opsForHash().put("user_" + token, "balance", params.getString("balance"));
+		// 设置平台在线缓存
 		redisTemplate.expire(key, 15, TimeUnit.SECONDS);
-		Map<Object, Object> userMap = redisTemplate.opsForHash().entries(key);
-		return new DataResult(Errors.OK, new Data(userMap));
+		
+		return new DataResult(Errors.OK);
 	}
 }
