@@ -16,7 +16,7 @@
 </head>
 <body>
 	<div class="tab-content" id="popup" v-cloak>
-		<div v-show="user.token">
+		<div v-if="user && user.token">
 			<ul class="om-nav" id="options">
 				<li class="om-nav-item" id="open-site">
 					<a href="#" role="button">
@@ -28,14 +28,10 @@
 				<li class="om-nav-item">
 					<div class="info">
 						当前账号：{{user.userName}} <br/>
-						到期时间：{{new Date(user.serverEnd).format("yyyy-MM-dd")}}
+						计划期数：{{bgPage.User.maxChase}} <br/>
+						当前期数：{{bgPage.User.chase}} <br/>
+						到期时间：{{new Date(parseInt(user.endTime)).format("yyyy-MM-dd")}}
 					</div>
-				</li>
-				<li class="om-nav-item om-nav-addrule">
-					<a href="#" @click="test" role="button">
-						<i class="fas fa-sign-out-alt"></i>
-						<span>TEST</span>
-					</a>
 				</li>
 				<li class="om-nav-item om-nav-addrule">
 					<a href="#" @click="logout" role="button">
@@ -65,7 +61,7 @@
 				</li>
 			</ul>
 		</div>
-		<div class="login" v-show="!user.token">
+		<div class="login" v-show="!user || !user.token">
 			
 			<form class="p-4" class="needs-validation" @submit.prevent="login" novalidate>
 				<div class="form-group">
@@ -86,6 +82,16 @@
 					<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-show="forms.loginForm.isLogin"></span> 
 					{{forms.loginForm.isLogin?"登录中...":"登 录"}}
 				</button>
+				<div class="om-nav-item om-nav-addrule">
+					<!-- <a href="#" @click="test" role="button">
+						<i class="fas fa-sign-out-alt"></i>
+						<span>测试投注</span>
+					</a>
+					<a href="#" @click="test1" role="button">
+						<i class="fas fa-sign-out-alt"></i>
+						<span>测试撤单</span>
+					</a> -->
+				</div>
 			</form>
 
 		</div>

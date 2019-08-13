@@ -1,8 +1,9 @@
-var Syc = {
+var Sync = {
+    connect:null,
     sync(){
         var deferred = $.Deferred();
         const me = this;
-        Web.ajax("api/sync", {
+        me.connect = Web.ajax("api/sync", {
             timeout:35000,
             success: function (data) {
                 deferred.resolve(data);
@@ -14,8 +15,8 @@ var Syc = {
                     return;   
                 }
                 if(data.errcode == 506){
-                    notify("提示", { body: "当前账户在其他地点登录！" });
-                    console.log("提示", "当前账户在其他地点登录！");
+                    notify("提示", { body: "当前账户已退出登录！" });
+                    console.log("提示", "当前账户已退出登录！");
                     return;   
                 }
                 if(data.errcode == 507){
@@ -53,21 +54,27 @@ var Syc = {
             this.handling();
         });
     },
+    abort(){
+        this.connect.abort();
+    },
     invokes:{
         LOTTERY:{
             BET(data){
-                Plan.bet(data);
+                if(!Plan.lastBet || Plan.lastBet.win != -1)
+                    Plan.bet(data);
             },
             REVOKE(data){
-
+                Plan.revoke();
             }
         },
         USER:{
             UPDATE(data){
-                Plan.maxChase = data;
+                User.maxChase = data;
+                User.chase = 0;
                 Plan.setLastBet(null);
             },
             RESET(data){
+                User.chase = 0;
                 Plan.setLastBet(null);
             }
         }

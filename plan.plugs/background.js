@@ -1,23 +1,35 @@
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	switch (request.cmd) {
+		case "ping":
+			User.ping(request);
+			Plan.balance = Big(request.balance);
+			sendResponse("");
+			break;
 		case "notify":
 			var nty = notify(request.title, request.options);
+			sendResponse("");
+			break;
+		case "sites":
+			sendResponse({
+				sites:Lottery.sites
+			});
 			break;
 		case "ack_bet":
-			// 投注成功消息
-			Plan.setLastBet(request.bet);
-			// Plan.balance = Plan.balance.sub(me.lastBet.prize);
-			var n = notify("计划["+request.bet.code+"]"+request.bet.period+"期第["+request.bet.position+"]位投注", {
-				body:"["+request.bet.code+"] 投注成功"
-			}, 3000);
-			console.log("当前余额："+Plan.balance);
+			if(request.success){
+				// 投注成功消息
+				Plan.setLastBet(request.bet);
+				User.chase ++;
+				console.log("当前余额："+Plan.balance);
+			}
+			Plan.ACK_BET(request.success);
 			break;
 		case "ack_revoke":
-			var n = notify("计划["+request.bet.code+"]"+request.bet.period+"期第["+request.bet.position+"]位撤销", {
-				body:"["+request.bet.code+"] 撤销成功"
-			}, 3000);
-			console.log("撤销订单："+Plan.balance+"成功");
+			if(request.success){
+				User.chase --;
+			}
+			Plan.ACK_REVOKE(request.success);
+			sendResponse("");
 			break;
 		case "request":
 			$.ajax({
@@ -63,10 +75,10 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo){
 });
 
 var Web = {
-	serverURL: "http://localhost/",
-	// serverURL: "http://118.89.37.101:9527/",
+	// serverURL: "http://localhost",
+	serverURL: "http:/106.12.29.65:89",
 	/* Common - Ajax request */
-	ajax: function (method, param) {
+	ajax: function (method, param, format) {
 		var cipher = Crypto.generateCipher();
 		if (!param)
 			param = {};
@@ -76,9 +88,9 @@ var Web = {
 			timeout: 20000,
 			safe: false,
 			data: {
-				token: User.getToken(),
+				token:  User.getToken(),
 			},
-			url: Web.serverURL,
+			url: Web.serverURL+"/",
 			success: function () { },
 			fail: function () { },
 			error: function () { }
@@ -93,12 +105,12 @@ var Web = {
 			};
 		}
 
-		$.ajax({
+		return $.ajax({
 			type: defaultParam.type,
 			data: defaultParam.type == "get" ? defaultParam.data : JSON.stringify(defaultParam.data),
 			async: defaultParam.async,
 			timeout: defaultParam.timeout,
-			url: defaultParam.url + method + "?format=json",
+			url: defaultParam.url + method + "?format="+(format?format:"json"),
 			contentType: "application/json",
 			processData: false,
 			dataType: "text",
@@ -114,9 +126,9 @@ var Web = {
 					switch (data.errcode) {
 						case 504:
 						case 507:
+						case 508:
+							break;
 						case 506:
-							Store.remove("token");
-							User.info = null;
 							break;
 						default:
 							break;
@@ -138,36 +150,11 @@ var Web = {
 	}
 };
 
+Lottery.getSites();
+
 User.getUserInfo(() => {
-	console.log("%c初始化成功", "color:green");
-	Syc.handling();
 	notify("操作提示", { body: "自动计划已连接" }, 3000);
 },() => {
-	User.setToken(null);
 	Plan.setLastBet(null);
+	User.setToken(null);
 });
-
-/* Web.ajax("api/getPublicKey", {
-	success: function (data) {
-		Crypto.setRSAPublicKey(data.info.n);
-		Crypto.encryptFlag = data.info.id;
-		
-		if (User.token) {
-			User.getUserInfo(() => {
-				console.log("%c初始化成功", "color:green");
-				notify("操作提示", { body: "自动计划初始化成功" }, 3000);
-			});
-		} else {
-			console.log("%c初始化成功", "color:green");
-			notify("操作提示", { body: "自动计划初始化成功" }, 3000);
-		}
-	},
-	fail: function (data) {
-		console.log("%c初始化失败", "color:red");
-		notify("操作提示", { body: "自动计划初始化失败" }, 3000);
-	},
-	error:function(){
-		console.log("%c初始化失败", "color:red");
-		notify("操作提示", { body: "自动计划初始化失败" }, 3000);
-	}
-}); */

@@ -1,10 +1,36 @@
 var Lottery = {
 	timer:null,
+	sites:[],
 	codes:{
 		"txffc":null,
 		"pk10":null,
 		"cqssc":null,
 		"xyft":null
+	},
+	getSites:function(success, fail){
+		const me = this;
+		Web.ajax("api/getWebSites", {
+			success: function (data) {
+				me.sites = data.info.split(",")
+				if(success)
+					success(data.info);
+
+				console.log("%c初始化配置成功", "color:green");
+				notify("操作提示", { body: "获取平台域名成功" }, 3000);
+			},
+			fail: function (data) {
+				if(fail)
+					fail(data);
+				console.log("%c初始化配置失败", "color:red");
+				notify("操作提示", { body: "获取平台域名失败" }, 3000);
+			},
+			error:function(){
+				if(fail)
+					fail();
+				console.log("%c初始化配置失败", "color:red");
+				notify("操作提示", { body: "获取平台域名失败" }, 3000);
+			}
+		});
 	},
 	getLastData:function(type){
 		var url = {
@@ -59,10 +85,9 @@ var Lottery = {
 	},
 	start:function(){
 		var me = this;
-		me.getLastData("pk10");
+		me.getLastData("xyft");
 		me.timer = setTimeout(() => {
-			if(Store.get("start"))
-				me.start();
+			me.start();
 		}, 10000);
 	},
 	stop:function(){

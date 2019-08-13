@@ -1,14 +1,18 @@
 var Plan = {
 	lastBet:null,
-	balance:Big(1000),
+	balance:Big(1),
 	strategy:{
-		odds:Big(8.99),
+		odds:Big(9.95),
 		play:"DS",
 		price:Big(0.1)
 	},
 	bet(plan){
 		const me = this;
 		const {period, code, play, price, position} = plan;
+		if(User.maxChase == 0){
+			notify("操作提示", { body: "未配置计划" }, 3000);
+			return;
+		}
 
 		var bet = {
 			period:period,
@@ -16,8 +20,9 @@ var Plan = {
 			position:position,
 			code:code,
 			price:price?price:me.strategy.price,
-			chase:1,
-			maxChase:User.info.maxChase
+			chase:User.chase,
+			maxChase:User.maxChase,
+			win:-1
 		};
 
 		let singleOdds = me.strategy.odds.div(10);
@@ -43,32 +48,28 @@ var Plan = {
 
 		bet.odds = odds;
 		//倍数计算
-		if(me.lastBet != null && !me.lastBet.pass){
+		if(me.lastBet != null && me.lastBet.win == 0){
 			bet.multi = me.lastBet.multi * 2;
 			bet.order = Big(me.lastBet.order).mul(2);
 			bet.prize = Big(me.lastBet.prize).mul(2);
 			bet.chase = me.lastBet.chase + 1;
 		}else{
-			bet.multi = parseInt(me.balance.div(Math.pow(2, User.info.maxChase) - 1).abs().mul(10));
+			bet.multi = parseInt(me.balance.div(Math.pow(2, User.maxChase) - 1).abs().mul(10));
+			for (let i = 0; i < User.chase; i++) {
+				bet.multi = bet.multi * 2;
+			}
 			bet.order = me.strategy.price.mul(bet.code.length).mul(bet.multi);
 			bet.prize = me.strategy.price.mul(odds).mul(bet.multi);
 		}
 
-		var sites = ["www.znvz806ubg.com",
-		"www.qbqeqelab7com",
-		"www.kjwpsj1406.com",
-		"www.4bnqa9q351.com",
-		"www.rkipm070dh.com",
-		"www.q6g3osf1na.com"];
-
-		if(sites){
+		if(Lottery.sites){
 			let urls = [];
-			sites.forEach((u, i) => {
+			Lottery.sites.forEach((u, i) => {
 				urls[i] = "*://"+u.trim()+"/*";
 			});
 			chrome.tabs.query({url:urls}, function(tabs){
 				if(!tabs.length){
-					alert("未检测到有可投注页面");
+					alert("未检测到平台页面");
 				}else{
 					chrome.tabs.update(tabs[0].id, {active:true});
 					chrome.tabs.sendMessage(tabs.length?tabs[0].id: null, {
@@ -81,12 +82,20 @@ var Plan = {
 			});
 		}
 	},
+	open(){
+		const me = this;
+		let codes = Lottery.codes["xyft"];
+		let openPeriod = codes?codes[0]:null;
+		if(openPeriod && me.lastBet && me.lastBet.win == -1 && me.lastBet.period.split("-")[1] == openPeriod){
+			me.prize(codes);
+		}else{
+			setTimeout(() => {
+				open();
+			}, 500);
+		}
+	},
 	prize(codes){
 		let me = this;
-		if(!codes || !me.lastBet || me.lastBet.period != parseInt(codes[0])){
-			return true;
-		}
-		
 		let win = false;
 		let playNum = {
 			"DX大":[6,7,8,9,10],
@@ -133,29 +142,62 @@ var Plan = {
 				"HZDS":"和值单双",
 				"LH":"龙虎"
 			}
-			me.lastBet.pass = true;
+			me.lastBet.win = 1;
 			updateLastBet();
-			// me.balance = me.balance.add(me.lastBet.prize);
 			console.log(
 				"计划["+me.lastBet.code+"] "+playName[me.lastBet.play] +" 第["+me.lastBet.position+"]位中奖：%c+"+me.lastBet.prize+"%c 中[%c"+openNum+"%c]", 
 				"color:#fff;background:red", "color:black", "color:red", "color:black");
-			me.chase = 1;
-		} else if(me.chase == User.info.maxChase){
+			User.chase = 0;
+		} else if(User.chase == User.maxChase){
+			me.lastBet.win = 0;
 			this.setLastBet(null);
-			console.log("计划["+that.schemeCache.name+"]倍数重置");
-			me.chase = 1;
+			console.log("到达最高期数");
+			User.chase = 0;
 		}else{
-			me.lastBet.pass = false;
+			me.lastBet.win = 0;
 			updateLastBet();
-			me.chase ++;
 		}
 	},
-	
+	revoke(){
+		if(Lottery.sites){
+			let urls = [];
+			Lottery.sites.forEach((u, i) => {
+				urls[i] = "*://"+u.trim()+"/*";
+			});
+			chrome.tabs.query({url:urls}, function(tabs){
+				if(!tabs.length){
+					alert("未检测到平台页面");
+				}else{
+					chrome.tabs.update(tabs[0].id, {active:true});
+					chrome.tabs.sendMessage(tabs.length?tabs[0].id: null, {
+						cmd:"revoke"
+					}, function(response) {
+						
+					});
+				}
+			});
+		}
+	},
 	setLastBet(bet){
 		this.lastBet = bet;
 		Store.set("lastBet", bet);
 	},
 	updateLastBet(){
-		Store.set("lastBet", bet);
+		Store.set("lastBet", this.lastBet);
+	},
+
+	ACK_BET(success){
+		Web.ajax("bet/syncBetting", {
+            data:{
+				success:success
+			}
+        });
+	},
+	ACK_REVOKE(success){
+		Web.ajax("bet/syncCancel", {
+            data:{
+				success:success
+			}
+        });
 	}
 }

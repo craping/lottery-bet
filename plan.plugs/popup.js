@@ -1,18 +1,11 @@
 var bgPage = chrome.extension.getBackgroundPage();
 
 $(function(){
-	var sites = ["www.znvz806ubg.com",
-		"www.qbqeqelab7com",
-		"www.kjwpsj1406.com",
-		"www.4bnqa9q351.com",
-		"www.rkipm070dh.com",
-		"www.q6g3osf1na.com"];
-	
 	new Vue({
 		el:"#popup",
 		data:{
-			sites:sites,
-			user:bgPage.User,
+			sites:bgPage.Lottery.sites,
+			user:bgPage.User.info,
 			forms:{
 				loginForm:{
 					login_name:"",
@@ -29,7 +22,7 @@ $(function(){
 				let loginForm = this.forms.loginForm;
 				loginForm.isLogin = true;
 				let vue = this;
-
+				
 				// Store.set("token", "data.info.token");
 				// loginForm.isLogin = false;
 				// bgPage.User = vue.user = {
@@ -43,10 +36,9 @@ $(function(){
 				bgPage.User.login(
 					loginForm.login_name, loginForm.login_pwd, 
 					function(data){
-						bgPage.Syc.handling();
 						loginForm.isLogin = false;
-						console.log(data.info);
-						vue.user = data.info;
+						console.log(data);
+						vue.user = data;
 					},
 					function(data){
 						loginForm.isLogin = false;
@@ -58,8 +50,8 @@ $(function(){
 				let vue = this;
 				bgPage.User.logout(
 					function(data){
-						console.log(data.msg);
-						vue.user = {};
+						bgPage.Sync.abort();
+						vue.user = null;
 					},
 					function(data){
 						notify("操作提示", {body:data.msg}, 3000);
@@ -68,11 +60,14 @@ $(function(){
 			},
 			test:()=>{
 				bgPage.Plan.bet({
-					period:123,
-					position:1,
+					period:"20190813-178",
+					position:2,
 					play:"DS",
-					code:"单",
+					code:"双",
 				});
+			},
+			test1(){
+				bgPage.Plan.revoke();
 			}
 		}
 	});

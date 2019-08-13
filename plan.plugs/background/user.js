@@ -1,5 +1,5 @@
 var User = {
-	token:null,
+	token:Store.get("token"),
 	setToken(token){
 		Store.set("token", token);
 		this.token = token;
@@ -7,20 +7,29 @@ var User = {
 	getToken(){
 		return this.token?this.token:Store.get("token");
 	},
+	maxChase:0,
+	chase:0,
 	info:{},
     login:function(name, pwd, success, fail){
+		const me = this;
         Web.ajax("user/login", {
-			safe:true,
+			safe:false,
             data:{
-                login_name:name,
-                login_pwd:md5(pwd)
+                userName:name,
+                userPwd:md5(pwd)
             },
             success:function(data){
-				Store.set("token", data.info.token);
-				User.info = data.info;
+				Plan.setLastBet(null);
+				me.setToken(data.info.token);
+				me.info = data.info;
+				me.maxChase = parseInt(data.info.periods);
+				me.chase = parseInt(data.info.nowPeriods);
+				Lottery.start();
+				Sync.handling();
+				Plan.open();
 
                 if(success)
-                    success(data);
+                    success(data.info);
             },
             fail:function(data){
                 if(fail)
@@ -32,14 +41,12 @@ var User = {
     logout:function(success, fail){
         Web.ajax("user/logout", {
             success:function(data){
-                Store.remove("token");
-                User.token = null;
-                User.userName = null;
-                User.serverEnd = null;
-                User.serverState = null;
-                User.locked = null;
+				Plan.setLastBet(null);
+				Lottery.stop();
+				Sync.abort();
+                User.info = null;
                 if(success)
-                    success(data);
+                    success();
             },
             fail:function(data){
                 alert(data.msg);
@@ -47,17 +54,32 @@ var User = {
                     fail(data);
             }
         });
-    },
+	},
+	ping(request){
+		request.chase = this.chase;
+		if(this.token)
+			Web.ajax("user/heartbeat", {data:request});
+	},
     getUserInfo:function(success, fail){
-		Web.ajax("user/getUserInfo", {
+		const me = this;
+		Web.ajax("user/userInfo", {
 			success:function(data){
 				User.info = data.info;
+				me.maxChase = parseInt(data.info.periods);
+				Lottery.start();
+				Sync.handling();
+				Plan.open();
+
 				if(success)
-					success(data);
+					success(data.info);
 			},
 			fail:function(data){
 				if(fail)
 					fail(data);
+			},
+			error:function(){
+				if(fail)
+					fail();
 			}
 		});
 	},
@@ -78,32 +100,5 @@ var User = {
                     fail(data);
 			}
 		});
-	},
-	bet:function(bet){
-		let play = {
-			"DWD":"DWD",
-			"DX":"DWD",
-			"DS":"DWD",
-			"HZ":"GYH",
-			"HZDX":"GYHDX",
-			"HZDS":"GYHDS",
-			"LH":"LH"
-		};
-		Web.ajax("bet/betting", {
-			data:{
-				lottery_type:bet.lottery,
-				bet_type:play[bet.play],
-				period:bet.period,
-				schema:bet.code.toString(),
-				position:bet.position,
-				amount:bet.order,
-				rate:bet.odds
-			},
-            fail:function(data){
-				setTimeout(() => {
-					User.bet(bet);
-				}, 500);
-            }
-        });
 	}
 }
