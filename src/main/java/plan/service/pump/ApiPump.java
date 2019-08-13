@@ -100,9 +100,7 @@ public class ApiPump extends DataPump<FullHttpRequest, Channel> {
 	@Pipe("getWebSites")
 	@BarScreen(
 		desc="获取投注网站地址",
-		params= {
-			@Parameter(type=TokenParam.class)
-		}
+		params= {}
 	)
 	public Errcode getWebSites(Map<String, Object> params) throws ErrcodeException {
 		String sites = "www.feiys15.com," + "hju.feiys15.com," + "etu.feiys15.com," + "cde.feiys15.com," + "saf.feiys15.com";
