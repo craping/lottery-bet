@@ -28,7 +28,7 @@ import plan.service.sync.NettySyncRender;
 public class HttpServer {
 
 	static final boolean SSL = System.getProperty("ssl") != null;
-	public static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "80"));
+	public static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "89"));
 	/** 用于分配处理业务线程的线程组个数 */
 	protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 默认
 	/** 业务出现线程大小 */

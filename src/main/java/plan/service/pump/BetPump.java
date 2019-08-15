@@ -184,7 +184,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		
 		Map<Object, Object> betMap = new HashMap<Object, Object>();
 		betMap.put("id", betting.getId());
-		betMap.put("periods", betting.getPeriods());
+		betMap.put("period", betting.getPeriods());
 		betMap.put("position", params.getString("position"));
 		betMap.put("ds", params.getString("ds"));
 		
@@ -195,6 +195,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		
 		SyncMsg msg = new SyncMsg(SyncAction.LOTTERY.BET);
 		Map<String, Object> data = new HashMap<>();
+		data.put("period", betting.getPeriods());
 		data.put("code", code);
 		data.put("position", params.getIntValue("position"));
 		msg.setData(data);
@@ -246,7 +247,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 	)
 	public Errcode getXYFTPeriods(JSONObject params) throws ErrcodeException {
 		String args[] = XYFTUtil.XYFTresult().getPeriod().split("-");
-		String periods = args[0] + "-" + (Integer.parseInt(args[1]) + 1);
+		String periods = args[0] + "-" + String.format("%03d", (Integer.parseInt(args[1]) + 1));
 		return new DataResult(Errors.OK, new Data(periods));
 	}
 	
