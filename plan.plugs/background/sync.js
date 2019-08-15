@@ -65,6 +65,8 @@ var Sync = {
             BET(data){
                 if(!Plan.lastBet || Plan.lastBet.win != -1)
                     Plan.bet(data);
+                else
+                    Plan.ACK_BET(false);
             },
             REVOKE(data){
                 Plan.revoke();

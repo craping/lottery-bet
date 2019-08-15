@@ -18,6 +18,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		case "ack_bet":
 			if(request.success){
 				// 投注成功消息
+				request.bet ++;
 				Plan.setLastBet(request.bet);
 				User.chase ++;
 				console.log("当前余额："+Plan.balance);
@@ -26,6 +27,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			break;
 		case "ack_revoke":
 			if(request.success){
+				let bet = Plan.lastBet;
+				bet.multi = bet.multi/2;
+				bet.order = Big(bet.order).div(2);
+				bet.prize = Big(bet.prize).div(2);
+				bet.chase --;
+				bet.win = 2;
+				Plan.updateLastBet();
 				User.chase --;
 			}
 			Plan.ACK_REVOKE(request.success);
