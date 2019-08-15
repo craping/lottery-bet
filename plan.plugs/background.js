@@ -76,7 +76,7 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo){
 
 var Web = {
 	// serverURL: "http://localhost",
-	serverURL: "http:/106.12.29.65:89",
+	serverURL: "http://139.9.95.186:89",
 	/* Common - Ajax request */
 	ajax: function (method, param, format) {
 		var cipher = Crypto.generateCipher();
@@ -136,7 +136,7 @@ var Web = {
 					if (defaultParam.fail)
 						defaultParam.fail(data, defaultParam.param);
 					if(data.result == -1)
-						console.log("%c服务器异常："+data.data.info, "color:red");
+						console.log("%c服务器异常："+data.msg, "color:red");
 				}
 			},
 			error: function (XMLHttpRequest, textStatus, errorThrown) {

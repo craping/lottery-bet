@@ -33,6 +33,10 @@ $(function(){
 					function(data){
 						loginForm.isLogin = false;
 						notify("操作提示", {body:data.msg}, 3000);
+					},
+					function(){
+						loginForm.isLogin = false;
+						notify("操作提示", {body:"网络连接失败"}, 3000);
 					}
 				);
 			},
@@ -47,6 +51,20 @@ $(function(){
 						notify("操作提示", {body:data.msg}, 3000);
 					}
 				);
+			},
+			getSites(){
+				if(!this.sites || this.sites.length == 0){
+					bgPage.Lottery.getSites((data)=>{
+						this.sites = data;
+						$("#options").addClass("om-hidden");
+						$("#site").removeClass("om-hidden");
+					},()=>{
+
+					});
+				}else{
+					$("#options").addClass("om-hidden");
+					$("#site").removeClass("om-hidden");
+				}
 			},
 			test:()=>{
 				bgPage.Plan.bet({

@@ -18,10 +18,10 @@
 	<div class="tab-content" id="popup" v-cloak>
 		<div v-if="user && user.token">
 			<ul class="om-nav" id="options">
-				<li class="om-nav-item" id="open-site">
+				<li class="om-nav-item" @click="getSites">
 					<a href="#" role="button">
 						<i class="fas fa-sitemap"></i>
-						<span class="om-profile-name">购彩页面</span>
+						<span class="om-profile-name">获取站点</span>
 					</a>
 				</li>
 				<li class="om-divider"></li>

@@ -143,19 +143,19 @@ var Plan = {
 				"LH":"龙虎"
 			}
 			me.lastBet.win = 1;
-			updateLastBet();
+			me.updateLastBet();
 			console.log(
 				"计划["+me.lastBet.code+"] "+playName[me.lastBet.play] +" 第["+me.lastBet.position+"]位中奖：%c+"+me.lastBet.prize+"%c 中[%c"+openNum+"%c]", 
 				"color:#fff;background:red", "color:black", "color:red", "color:black");
 			User.chase = 0;
 		} else if(User.chase == User.maxChase){
 			me.lastBet.win = 0;
-			this.setLastBet(null);
+			me.setLastBet(null);
 			console.log("到达最高期数");
 			User.chase = 0;
 		}else{
 			me.lastBet.win = 0;
-			updateLastBet();
+			me.updateLastBet();
 		}
 	},
 	revoke(){

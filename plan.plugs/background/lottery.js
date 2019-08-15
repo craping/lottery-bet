@@ -13,7 +13,7 @@ var Lottery = {
 			success: function (data) {
 				me.sites = data.info.split(",")
 				if(success)
-					success(data.info);
+					success(me.sites);
 
 				console.log("%c初始化配置成功", "color:green");
 				notify("操作提示", { body: "获取平台域名成功" }, 3000);

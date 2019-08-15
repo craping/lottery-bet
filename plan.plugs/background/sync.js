@@ -9,21 +9,24 @@ var Sync = {
                 deferred.resolve(data);
             },
             fail: function (data) {
-                if(data.errcode == 504){
-                    notify("提示", { body: "您的账号已被冻结，请联系管理员" });
-                    console.log("提示", "您的账号已被冻结，请联系管理员");
-                    return;   
+                switch (data.errcode) {
+                    case 504:
+                        notify("提示", { body: "您的账号已被冻结，请联系管理员" });
+                        console.log("提示", "您的账号已被冻结，请联系管理员");
+                        User.distory()
+                        break;
+                    case 506:
+                        notify("提示", { body: "当前账户已退出登录！" });
+                        console.log("提示", "当前账户已退出登录！");
+                        User.distory()
+                        break;
+                    case 507:
+                        notify("提示", { body: "您的服务已到期，请联系管理员" });
+                        console.log("提示", "您的服务已到期，请联系管理员");
+                        User.distory()
+                        break;
                 }
-                if(data.errcode == 506){
-                    notify("提示", { body: "当前账户已退出登录！" });
-                    console.log("提示", "当前账户已退出登录！");
-                    return;   
-                }
-                if(data.errcode == 507){
-                    notify("提示", { body: "您的服务已到期，请联系管理员" });
-                    console.log("提示", "您的服务已到期，请联系管理员");
-                    return;   
-                }
+
                 deferred.reject();
                 me.sync();
             },

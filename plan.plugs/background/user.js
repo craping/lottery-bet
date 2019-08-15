@@ -10,7 +10,7 @@ var User = {
 	maxChase:0,
 	chase:0,
 	info:{},
-    login:function(name, pwd, success, fail){
+    login:function(name, pwd, success, fail, error){
 		const me = this;
         Web.ajax("user/login", {
 			safe:false,
@@ -30,7 +30,11 @@ var User = {
 
                 if(success)
                     success(data.info);
-            },
+			},
+			error:function(){
+				if(error)
+                    error();
+			},
             fail:function(data){
                 if(fail)
                     fail(data);
@@ -39,12 +43,10 @@ var User = {
         
     },
     logout:function(success, fail){
+		const me = this;
         Web.ajax("user/logout", {
             success:function(data){
-				Plan.setLastBet(null);
-				Lottery.stop();
-				Sync.abort();
-                User.info = null;
+				me.distory();
                 if(success)
                     success();
             },
@@ -59,6 +61,12 @@ var User = {
 		request.chase = this.chase;
 		if(this.token)
 			Web.ajax("user/heartbeat", {data:request});
+	},
+	distory(){
+		Plan.setLastBet(null);
+		Lottery.stop();
+		Sync.abort();
+		User.info = null;
 	},
     getUserInfo:function(success, fail){
 		const me = this;
