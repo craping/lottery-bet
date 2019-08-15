@@ -247,7 +247,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 	)
 	public Errcode getXYFTPeriods(JSONObject params) throws ErrcodeException {
 		String args[] = XYFTUtil.XYFTresult().getPeriod().split("-");
-		String periods = args[0] + "-" + (Integer.parseInt(args[1]) + 1);
+		String periods = args[0] + "-" + String.format("%03d", (Integer.parseInt(args[1]) + 1));
 		return new DataResult(Errors.OK, new Data(periods));
 	}
 	

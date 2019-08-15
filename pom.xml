@@ -10,11 +10,6 @@
 			<artifactId>jrain-mvc</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.crap.data</groupId>
-			<artifactId>data-dao</artifactId>
-			<version>1.0.0</version>
-		</dependency>
 		
 		<!-- redis 缓存 -->
 		<!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
@@ -54,18 +49,6 @@
 			<scope>provided</scope>
 		</dependency>
 		
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>5.0.1.RELEASE</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<!-- jsoup HTML parser library @ https://jsoup.org/ -->
 			<groupId>org.jsoup</groupId>
