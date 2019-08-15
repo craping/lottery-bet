@@ -184,7 +184,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		
 		Map<Object, Object> betMap = new HashMap<Object, Object>();
 		betMap.put("id", betting.getId());
-		betMap.put("periods", betting.getPeriods());
+		betMap.put("period", betting.getPeriods());
 		betMap.put("position", params.getString("position"));
 		betMap.put("ds", params.getString("ds"));
 		
