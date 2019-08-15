@@ -256,18 +256,22 @@ public class UserPump extends DataPump<FullHttpRequest, Channel> {
 	)
 	public Errcode heartbeat(JSONObject params) {
 		String token = params.getString("token");
-		String key = "user_" + token + "_ON";
-		if (!RedisUtil.exists(key)) {
+		
+		if (!RedisUtil.exists("user_" + token))
+			return new Result(CustomErrors.USER_NOT_LOGIN); 
+		
+		String onlineKey = "online_" + token;
+		if (!RedisUtil.exists(onlineKey)) {
 			Map<Object, Object> userMap = new HashMap<Object, Object>();
 			userMap.put("token", token);
 			userMap.put("loginTime", String.valueOf(new Date().getTime()));
-			redisTemplate.opsForHash().putAll(key, userMap);
+			redisTemplate.opsForHash().putAll(onlineKey, userMap);
+			// 设置平台在线缓存
+			redisTemplate.expire(onlineKey, 15, TimeUnit.SECONDS);
 		}
 		
 		// 更新余额
 		redisTemplate.opsForHash().put("user_" + token, "balance", params.getString("balance"));
-		// 设置平台在线缓存
-		redisTemplate.expire(key, 15, TimeUnit.SECONDS);
 		
 		return new DataResult(Errors.OK);
 	}

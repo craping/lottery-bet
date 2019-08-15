@@ -20,6 +20,7 @@ public class XYFTUtil {
 		Document doc = null;
 		try {
 			doc = Jsoup.connect("https://www.1392p.com/xyft/?utp=topbar").get();
+			//doc = Jsoup.connect("https://www.1396u.com/xyft/getawarddata?uml=1396j&t=0.26956910929102196").get();
 		} catch (IOException e) {
 			log.error("数据抓取异常：", e);
 			e.printStackTrace();

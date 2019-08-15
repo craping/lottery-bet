@@ -195,6 +195,7 @@ public class BetPump extends DataPump<FullHttpRequest, Channel> {
 		
 		SyncMsg msg = new SyncMsg(SyncAction.LOTTERY.BET);
 		Map<String, Object> data = new HashMap<>();
+		data.put("period", betting.getPeriods());
 		data.put("code", code);
 		data.put("position", params.getIntValue("position"));
 		msg.setData(data);
