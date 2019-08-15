@@ -24,6 +24,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 				console.log("当前余额："+Plan.balance);
 			}
 			Plan.ACK_BET(request.success);
+			sendResponse("");
 			break;
 		case "ack_revoke":
 			if(request.success){

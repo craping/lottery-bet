@@ -152,7 +152,6 @@ var Plan = {
 			me.lastBet.win = 0;
 			me.setLastBet(null);
 			console.log("到达最高期数");
-			User.chase = 0;
 		}else{
 			me.lastBet.win = 0;
 			me.updateLastBet();
